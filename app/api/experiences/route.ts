@@ -1,10 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import {
   fixtureCreateExperience,
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
 import { getAuthenticatedUserId } from "@/lib/auth/server";
+import { redirectAfterPost } from "@/lib/http/redirect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function normalizeText(value: FormDataEntryValue | null) {
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
     const userId = getFixtureAuthUserId(request.cookies);
 
     if (!userId) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return redirectAfterPost(new URL("/login", request.url));
     }
 
     const restaurantName = normalizeText(formData.get("restaurant_name"));
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     const notes = normalizeText(formData.get("notes"));
 
     if (!restaurantName || !location || !category || !orderedMenus || !visitDate) {
-      return NextResponse.redirect(
+      return redirectAfterPost(
         new URL("/app?error=missing-restaurant-fields", request.url),
       );
     }
@@ -45,12 +46,12 @@ export async function POST(request: NextRequest) {
 
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
-      return NextResponse.redirect(
+      return redirectAfterPost(
         new URL(`/app?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/app?experience=${result.experience_id}&created=1`, request.url),
     );
   }
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
   const userId = await getAuthenticatedUserId(supabase);
 
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirectAfterPost(new URL("/login", request.url));
   }
 
   const { data: membership } = await supabase
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!membership) {
-    return NextResponse.redirect(new URL("/app?error=authentication_required", request.url));
+    return redirectAfterPost(new URL("/app?error=authentication_required", request.url));
   }
 
   const restaurantName = normalizeText(formData.get("restaurant_name"));
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
   const notes = normalizeText(formData.get("notes"));
 
   if (!restaurantName || !location || !category || !orderedMenus || !visitDate) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL("/app?error=missing-restaurant-fields", request.url),
     );
   }
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (subjectError) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/app?error=${encodeURIComponent(subjectError.message)}`, request.url),
     );
   }
@@ -122,12 +123,12 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (experienceError) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/app?error=${encodeURIComponent(experienceError.message)}`, request.url),
     );
   }
 
-  return NextResponse.redirect(
+  return redirectAfterPost(
     new URL(`/app?experience=${experience.id}&created=1`, request.url),
   );
 }

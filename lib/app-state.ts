@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { getAuthenticatedUserId } from "@/lib/auth/server";
 import type { Json } from "@/lib/supabase/types";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { buildFixtureAppState, getFixtureAuthUserId, isE2EMode } from "@/lib/e2e-fixture";
@@ -116,13 +117,13 @@ export async function getAppState(): Promise<AppState> {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const userId = await getAuthenticatedUserId(supabase);
 
-  if (authError || !authData.user) {
+  if (!userId) {
     redirect("/login");
   }
 
-  const user = authData.user;
+  const user = { id: userId };
 
   const { data: membership } = await supabase
     .from("pair_memberships")

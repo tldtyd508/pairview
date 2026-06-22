@@ -23,6 +23,7 @@ test("auth route files are wired", () => {
   const experienceRoute = read("app/api/experiences/route.ts");
   const reviewRoute = read("app/api/reviews/route.ts");
   const serverAuth = read("lib/auth/server.ts");
+  const postRedirect = read("lib/http/redirect.ts");
 
   assert.match(loginPanel, /signInWithIdToken/);
   assert.match(loginPanel, /accounts\.google\.com\/gsi\/client/);
@@ -43,6 +44,8 @@ test("auth route files are wired", () => {
   assert.match(serverAuth, /getClaims/);
   assert.doesNotMatch(createRoute, /auth\.getUser/);
   assert.doesNotMatch(joinRoute, /auth\.getUser/);
+  assert.match(postRedirect, /status:\s*303/);
+  assert.doesNotMatch(middleware, /auth\.getUser/);
   assert.match(appPage, /새 음식점 기록/);
   assert.match(appPage, /첫 방문만 새 기록/);
   assert.match(appPage, /리뷰를 저장했다/);

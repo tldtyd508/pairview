@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import {
   fixtureAttachMarker,
   fixtureDetachMarker,
@@ -6,6 +6,7 @@ import {
   isE2EMode,
 } from "@/lib/e2e-fixture";
 import { getAuthenticatedUserId } from "@/lib/auth/server";
+import { redirectAfterPost } from "@/lib/http/redirect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function normalizeText(value: FormDataEntryValue | null) {
@@ -20,14 +21,14 @@ export async function POST(request: NextRequest) {
   const intent = normalizeText(formData.get("intent")) ?? "attach";
 
   if (!experienceId || !markerId) {
-    return NextResponse.redirect(new URL("/app?error=missing-marker-fields", request.url));
+    return redirectAfterPost(new URL("/app?error=missing-marker-fields", request.url));
   }
 
   if (isE2EMode()) {
     const userId = getFixtureAuthUserId(request.cookies);
 
     if (!userId) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return redirectAfterPost(new URL("/login", request.url));
     }
 
     const result =
@@ -37,12 +38,12 @@ export async function POST(request: NextRequest) {
 
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
-      return NextResponse.redirect(
+      return redirectAfterPost(
         new URL(`/history/${experienceId}?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(
         `/history/${experienceId}?${intent === "detach" ? "marker_removed" : "marker_applied"}=1`,
         request.url,
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
   const userId = await getAuthenticatedUserId(supabase);
 
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirectAfterPost(new URL("/login", request.url));
   }
 
   const { data: experience } = await supabase
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!experience) {
-    return NextResponse.redirect(new URL("/app?error=experience-not-found", request.url));
+    return redirectAfterPost(new URL("/app?error=experience-not-found", request.url));
   }
 
   const { data: membership } = await supabase
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!membership) {
-    return NextResponse.redirect(new URL("/app?error=forbidden-review", request.url));
+    return redirectAfterPost(new URL("/app?error=forbidden-review", request.url));
   }
 
   if (intent === "detach") {
@@ -86,12 +87,12 @@ export async function POST(request: NextRequest) {
       .eq("marker_id", markerId);
 
     if (error) {
-      return NextResponse.redirect(
+      return redirectAfterPost(
         new URL(`/history/${experience.id}?error=${encodeURIComponent(error.message)}`, request.url),
       );
     }
 
-    return NextResponse.redirect(new URL(`/history/${experience.id}?marker_removed=1`, request.url));
+    return redirectAfterPost(new URL(`/history/${experience.id}?marker_removed=1`, request.url));
   }
 
   const { data: marker } = await supabase
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!marker || marker.pair_id !== experience.pair_id) {
-    return NextResponse.redirect(new URL("/app?error=experience-not-found", request.url));
+    return redirectAfterPost(new URL("/app?error=experience-not-found", request.url));
   }
 
   const { error } = await supabase.from("experience_markers").upsert(
@@ -115,10 +116,10 @@ export async function POST(request: NextRequest) {
   );
 
   if (error) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/history/${experience.id}?error=${encodeURIComponent(error.message)}`, request.url),
     );
   }
 
-  return NextResponse.redirect(new URL(`/history/${experience.id}?marker_applied=1`, request.url));
+  return redirectAfterPost(new URL(`/history/${experience.id}?marker_applied=1`, request.url));
 }
