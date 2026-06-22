@@ -13,6 +13,7 @@ test("auth route files are wired", () => {
   const loginPage = read("app/login/page.tsx");
   const loginPanel = read("app/login/login-panel.tsx");
   const callbackRoute = read("app/auth/callback/route.ts");
+  const profileRoute = read("app/api/auth/profile/route.ts");
   const logoutRoute = read("app/logout/route.ts");
   const middleware = read("middleware.ts");
   const createRoute = read("app/api/pairs/create/route.ts");
@@ -22,9 +23,13 @@ test("auth route files are wired", () => {
   const experienceRoute = read("app/api/experiences/route.ts");
   const reviewRoute = read("app/api/reviews/route.ts");
 
-  assert.match(loginPanel, /signInWithOAuth/);
+  assert.match(loginPanel, /signInWithIdToken/);
+  assert.match(loginPanel, /accounts\.google\.com\/gsi\/client/);
+  assert.match(loginPanel, /use_fedcm_for_prompt/);
+  assert.match(loginPanel, /nonce/);
   assert.match(callbackRoute, /exchangeCodeForSession/);
-  assert.match(callbackRoute, /upsert/);
+  assert.match(callbackRoute, /syncUserProfile/);
+  assert.match(profileRoute, /syncUserProfile/);
   assert.match(logoutRoute, /signOut/);
   assert.match(middleware, /matcher:\s*\[\s*"\/app\/:path\*"/);
   assert.match(middleware, /\/login/);
