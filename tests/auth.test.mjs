@@ -19,6 +19,8 @@ test("auth route files are wired", () => {
   const joinRoute = read("app/api/pairs/join/route.ts");
   const appPage = read("app/app/page.tsx");
   const migration = read("supabase/migrations/0002_pair_onboarding.sql");
+  const experienceRoute = read("app/api/experiences/route.ts");
+  const reviewRoute = read("app/api/reviews/route.ts");
 
   assert.match(loginPanel, /signInWithOAuth/);
   assert.match(callbackRoute, /exchangeCodeForSession/);
@@ -28,8 +30,13 @@ test("auth route files are wired", () => {
   assert.match(middleware, /\/login/);
   assert.match(createRoute, /create_pair_with_invitation/);
   assert.match(joinRoute, /join_pair_via_invitation/);
-  assert.match(appPage, /Pair setup/);
-  assert.match(appPage, /Invitation state/);
+  assert.match(experienceRoute, /first_visit_only/);
+  assert.match(experienceRoute, /restaurant_name/);
+  assert.match(reviewRoute, /experience_id/);
+  assert.match(reviewRoute, /upsert/);
+  assert.match(appPage, /새 음식점 기록/);
+  assert.match(appPage, /첫 방문만 새 기록/);
+  assert.match(appPage, /리뷰를 저장했다/);
   assert.match(migration, /shares_pair_with_user/);
   assert.match(migration, /users can read pairmate profiles/);
   assert.match(migration, /pair_is_full/);
