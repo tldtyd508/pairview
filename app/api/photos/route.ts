@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import {
   fixtureUploadPhoto,
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
 import { getAuthenticatedUserId } from "@/lib/auth/server";
+import { redirectAfterPost } from "@/lib/http/redirect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const allowedMimeTypes = new Map([
@@ -29,24 +30,24 @@ export async function POST(request: NextRequest) {
   const file = formData.get("photo");
 
   if (!experienceId || !(file instanceof File)) {
-    return NextResponse.redirect(new URL("/app?error=missing-photo-fields", request.url));
+    return redirectAfterPost(new URL("/app?error=missing-photo-fields", request.url));
   }
 
   const extension = allowedMimeTypes.get(file.type);
 
   if (!extension) {
-    return NextResponse.redirect(new URL("/app?error=invalid-photo-type", request.url));
+    return redirectAfterPost(new URL("/app?error=invalid-photo-type", request.url));
   }
 
   if (file.size > maxFileSizeBytes) {
-    return NextResponse.redirect(new URL("/app?error=photo-too-large", request.url));
+    return redirectAfterPost(new URL("/app?error=photo-too-large", request.url));
   }
 
   if (isE2EMode()) {
     const userId = getFixtureAuthUserId(request.cookies);
 
     if (!userId) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return redirectAfterPost(new URL("/login", request.url));
     }
 
     const result = await fixtureUploadPhoto(userId, {
@@ -57,19 +58,19 @@ export async function POST(request: NextRequest) {
 
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
-      return NextResponse.redirect(
+      return redirectAfterPost(
         new URL(`/history/${experienceId}?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
-    return NextResponse.redirect(new URL(`/history/${experienceId}?photo_uploaded=1`, request.url));
+    return redirectAfterPost(new URL(`/history/${experienceId}?photo_uploaded=1`, request.url));
   }
 
   const supabase = await createSupabaseServerClient();
   const userId = await getAuthenticatedUserId(supabase);
 
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirectAfterPost(new URL("/login", request.url));
   }
 
   const { data: experience } = await supabase
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!experience) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/history/${experienceId}?error=experience-not-found`, request.url),
     );
   }
@@ -92,7 +93,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!membership) {
-    return NextResponse.redirect(new URL(`/history/${experienceId}?error=forbidden-review`, request.url));
+    return redirectAfterPost(new URL(`/history/${experienceId}?error=forbidden-review`, request.url));
   }
 
   const path = `${experience.pair_id}/${experience.id}/${randomUUID()}.${extension}`;
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
     });
 
   if (uploadError) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/history/${experience.id}?error=${encodeURIComponent(uploadError.message)}`, request.url),
     );
   }
@@ -130,10 +131,10 @@ export async function POST(request: NextRequest) {
   });
 
   if (insertError) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/history/${experience.id}?error=${encodeURIComponent(insertError.message)}`, request.url),
     );
   }
 
-  return NextResponse.redirect(new URL(`/history/${experience.id}?photo_uploaded=1`, request.url));
+  return redirectAfterPost(new URL(`/history/${experience.id}?photo_uploaded=1`, request.url));
 }

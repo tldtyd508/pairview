@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { getAuthenticatedUserId } from "@/lib/auth/server";
 import { getFixtureAuthUserId, isE2EMode } from "@/lib/e2e-fixture";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
 import type { Database } from "@/lib/supabase/types";
@@ -62,14 +63,14 @@ export async function middleware(request: NextRequest) {
     },
   );
 
-  const { data } = await supabase.auth.getUser();
-  if (!data.user && isProtectedApp) {
+  const userId = await getAuthenticatedUserId(supabase);
+  if (!userId && isProtectedApp) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (data.user && isLoginPage) {
+  if (userId && isLoginPage) {
     return NextResponse.redirect(new URL("/app", request.url));
   }
 

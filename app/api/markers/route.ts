@@ -1,10 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import {
   fixtureCreateMarker,
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
 import { getAuthenticatedUserId } from "@/lib/auth/server";
+import { redirectAfterPost } from "@/lib/http/redirect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function normalizeText(value: FormDataEntryValue | null) {
@@ -20,14 +21,14 @@ export async function POST(request: NextRequest) {
   const description = normalizeText(formData.get("description"));
 
   if (!name || !icon || !color) {
-    return NextResponse.redirect(new URL("/app?error=missing-marker-fields", request.url));
+    return redirectAfterPost(new URL("/app?error=missing-marker-fields", request.url));
   }
 
   if (isE2EMode()) {
     const userId = getFixtureAuthUserId(request.cookies);
 
     if (!userId) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return redirectAfterPost(new URL("/login", request.url));
     }
 
     const result = fixtureCreateMarker(userId, {
@@ -39,19 +40,19 @@ export async function POST(request: NextRequest) {
 
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
-      return NextResponse.redirect(
+      return redirectAfterPost(
         new URL(`/app?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
-    return NextResponse.redirect(new URL("/app?marker_created=1", request.url));
+    return redirectAfterPost(new URL("/app?marker_created=1", request.url));
   }
 
   const supabase = await createSupabaseServerClient();
   const userId = await getAuthenticatedUserId(supabase);
 
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirectAfterPost(new URL("/login", request.url));
   }
 
   const { data: membership } = await supabase
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!membership) {
-    return NextResponse.redirect(new URL("/app?error=authentication_required", request.url));
+    return redirectAfterPost(new URL("/app?error=authentication_required", request.url));
   }
 
   const { error } = await supabase.from("markers").insert({
@@ -74,10 +75,10 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/app?error=${encodeURIComponent(error.message)}`, request.url),
     );
   }
 
-  return NextResponse.redirect(new URL("/app?marker_created=1", request.url));
+  return redirectAfterPost(new URL("/app?marker_created=1", request.url));
 }

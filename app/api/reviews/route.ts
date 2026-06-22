@@ -1,10 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import {
   fixtureUpsertReview,
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
 import { getAuthenticatedUserId } from "@/lib/auth/server";
+import { redirectAfterPost } from "@/lib/http/redirect";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function normalizeText(value: FormDataEntryValue | null) {
@@ -19,20 +20,20 @@ export async function POST(request: NextRequest) {
   const body = normalizeText(formData.get("body"));
 
   if (!experienceId || !scoreValue) {
-    return NextResponse.redirect(new URL("/app?error=missing-review-fields", request.url));
+    return redirectAfterPost(new URL("/app?error=missing-review-fields", request.url));
   }
 
   const score = Number(scoreValue);
 
   if (!Number.isFinite(score) || score < 0 || score > 5) {
-    return NextResponse.redirect(new URL("/app?error=invalid-score", request.url));
+    return redirectAfterPost(new URL("/app?error=invalid-score", request.url));
   }
 
   if (isE2EMode()) {
     const userId = getFixtureAuthUserId(request.cookies);
 
     if (!userId) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return redirectAfterPost(new URL("/login", request.url));
     }
 
     const result = fixtureUpsertReview(userId, {
@@ -43,12 +44,12 @@ export async function POST(request: NextRequest) {
 
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
-      return NextResponse.redirect(
+      return redirectAfterPost(
         new URL(`/app?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/app?reviewed=1&experience=${result.experience_id}`, request.url),
     );
   }
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
   const userId = await getAuthenticatedUserId(supabase);
 
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return redirectAfterPost(new URL("/login", request.url));
   }
 
   const { data: experience, error: experienceError } = await supabase
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (experienceError || !experience) {
-    return NextResponse.redirect(new URL("/app?error=experience-not-found", request.url));
+    return redirectAfterPost(new URL("/app?error=experience-not-found", request.url));
   }
 
   const { data: membership } = await supabase
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!membership) {
-    return NextResponse.redirect(new URL("/app?error=forbidden-review", request.url));
+    return redirectAfterPost(new URL("/app?error=forbidden-review", request.url));
   }
 
   const { error } = await supabase.from("reviews").upsert(
@@ -93,12 +94,12 @@ export async function POST(request: NextRequest) {
   );
 
   if (error) {
-    return NextResponse.redirect(
+    return redirectAfterPost(
       new URL(`/app?error=${encodeURIComponent(error.message)}`, request.url),
     );
   }
 
-  return NextResponse.redirect(
+  return redirectAfterPost(
     new URL(`/app?reviewed=1&experience=${experience.id}`, request.url),
   );
 }
