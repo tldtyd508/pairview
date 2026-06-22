@@ -44,6 +44,7 @@ npm run dev
 | `NEXT_PUBLIC_SITE_URL` | yes | 공개 배포 URL. 로컬에서는 `http://localhost:3000` |
 | `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | 브라우저와 서버에서 사용하는 publishable anon key |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | yes | Google Identity Services Web client ID |
 | `SUPABASE_SERVICE_ROLE_KEY` | no | 현재 앱 런타임에서는 사용하지 않음. 로컬 관리 작업에만 보관하며 VCS에 커밋 금지 |
 
 실제 값은 `.env.local`과 Vercel Environment Variables에만 저장합니다. E2E 전용 `PAIRVIEW_E2E_MODE`는 Playwright가 자체 주입하며 일반 실행이나 배포에 설정하면 안 됩니다.
@@ -55,7 +56,7 @@ npm run dev
    - `supabase/migrations/0001_initial_schema.sql`
    - `supabase/migrations/0002_pair_onboarding.sql`
    - `supabase/migrations/0003_storage_and_photos.sql`
-3. Google OAuth와 Supabase redirect allow list에 다음 callback을 등록합니다.
+3. Google OAuth의 Authorized JavaScript origins에 local/production origin을 등록하고, Supabase redirect allow list에 다음 callback을 등록합니다.
    - `http://localhost:3000/auth/callback`
    - `https://pairview.vercel.app/auth/callback`
 4. 생성된 private `pairview` Storage bucket이 public으로 노출되지 않았는지 확인합니다.
@@ -74,6 +75,8 @@ npm run build
 ```
 
 Playwright E2E는 외부 OAuth와 DB에 의존하지 않는 격리 fixture 모드로 로그인 경계, pair 생성/합류, 음식점 등록, 두 리뷰, 마커, 사진, 기록 조회를 검증합니다. 실제 Google/Supabase 연결은 배포 전 수동 점검표로 별도 확인해야 합니다.
+
+Production 로그인은 Google Identity Services popup에서 받은 ID token을 nonce와 함께 Supabase에 전달합니다. 따라서 사용자는 Google 로그인 중 Supabase project domain으로 이동하지 않습니다.
 
 ## Vercel deployment
 

@@ -11,6 +11,7 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = searchParams ? await searchParams : undefined;
   const e2eMode = process.env.PAIRVIEW_E2E_MODE === "1";
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 
   return (
     <main className="min-h-screen px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
@@ -31,7 +32,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
 
           <div className="mt-8">
-            <LoginPanel nextPath={params?.next} error={params?.error} e2eMode={e2eMode} />
+            <LoginPanel
+              nextPath={params?.next}
+              error={params?.error}
+              e2eMode={e2eMode}
+              googleClientId={googleClientId}
+            />
           </div>
 
           <div className="mt-8">

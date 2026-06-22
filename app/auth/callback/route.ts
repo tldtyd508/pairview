@@ -1,39 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { syncUserProfile } from "@/lib/auth/sync-profile";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/auth/redirect";
-
-async function syncUserProfile(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
-) {
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-
-  if (authError) {
-    throw authError;
-  }
-
-  const user = authData.user;
-
-  if (!user) {
-    throw new Error("No authenticated user after callback");
-  }
-
-  const displayName =
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.email?.split("@")[0] ??
-    null;
-  const avatarUrl = user.user_metadata?.avatar_url ?? null;
-
-  const { error: profileError } = await supabase.from("users").upsert({
-    auth_user_id: user.id,
-    display_name: displayName,
-    avatar_url: avatarUrl,
-  }, { onConflict: "auth_user_id" });
-
-  if (profileError) {
-    throw profileError;
-  }
-}
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
