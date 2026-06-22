@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --page-bg: #f5eee4;
+  --page-bg-strong: #ede1cf;
+  --page-surface: rgba(255, 250, 242, 0.78);
+  --page-border: rgba(62, 48, 35, 0.1);
+  --page-text: #1f1a16;
+  --page-muted: #6d6259;
+  --page-accent: #ef6a4c;
+  --page-accent-soft: rgba(239, 106, 76, 0.14);
+  --font-body:
+    "Avenir Next", "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo",
+    system-ui, sans-serif;
+  --font-display: "Iowan Old Style", "Baskerville", "Noto Serif KR", serif;
+}
+
+html {
+  min-height: 100%;
+  background: var(--page-bg);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--page-text);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(circle at top left, rgba(239, 106, 76, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 20%, rgba(79, 70, 229, 0.09), transparent 28%),
+    linear-gradient(180deg, #faf6ef 0%, var(--page-bg) 40%, #f1e7d8 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(239, 106, 76, 0.22);
+}
