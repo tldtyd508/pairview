@@ -4,6 +4,7 @@ import {
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
+import { getAuthenticatedUserId } from "@/lib/auth/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -34,9 +35,9 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const userId = await getAuthenticatedUserId(supabase);
 
-  if (authError || !authData.user) {
+  if (!userId) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

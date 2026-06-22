@@ -5,6 +5,7 @@ import {
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
+import { getAuthenticatedUserId } from "@/lib/auth/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const allowedMimeTypes = new Map([
@@ -65,9 +66,9 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const userId = await getAuthenticatedUserId(supabase);
 
-  if (authError || !authData.user) {
+  if (!userId) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
   const { data: membership } = await supabase
     .from("pair_memberships")
     .select("pair_id")
-    .eq("user_id", authData.user.id)
+    .eq("user_id", userId)
     .eq("pair_id", experience.pair_id)
     .maybeSingle();
 
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
     storage_path: path,
     caption,
     sort_order: (latestAttachment?.sort_order ?? -1) + 1,
-    created_by_user_id: authData.user.id,
+    created_by_user_id: userId,
   });
 
   if (insertError) {
