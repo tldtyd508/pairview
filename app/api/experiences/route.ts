@@ -1,4 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  fixtureCreateExperience,
+  getFixtureAuthUserId,
+  isE2EMode,
+} from "@/lib/e2e-fixture";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function normalizeText(value: FormDataEntryValue | null) {
@@ -8,6 +13,47 @@ function normalizeText(value: FormDataEntryValue | null) {
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
+  if (isE2EMode()) {
+    const userId = getFixtureAuthUserId(request.cookies);
+
+    if (!userId) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    const restaurantName = normalizeText(formData.get("restaurant_name"));
+    const location = normalizeText(formData.get("location"));
+    const category = normalizeText(formData.get("category"));
+    const orderedMenus = normalizeText(formData.get("ordered_menus"));
+    const visitDate = normalizeText(formData.get("visit_date"));
+    const notes = normalizeText(formData.get("notes"));
+
+    if (!restaurantName || !location || !category || !orderedMenus || !visitDate) {
+      return NextResponse.redirect(
+        new URL("/app?error=missing-restaurant-fields", request.url),
+      );
+    }
+
+    const result = fixtureCreateExperience(userId, {
+      restaurantName,
+      location,
+      category,
+      orderedMenus,
+      visitDate,
+      notes,
+    });
+
+    if ("error" in result) {
+      const errorMessage = result.error ?? "unknown_error";
+      return NextResponse.redirect(
+        new URL(`/app?error=${encodeURIComponent(errorMessage)}`, request.url),
+      );
+    }
+
+    return NextResponse.redirect(
+      new URL(`/app?experience=${result.experience_id}&created=1`, request.url),
+    );
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
 

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import type { Json } from "@/lib/supabase/types";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { buildFixtureAppState, getFixtureAuthUserId, isE2EMode } from "@/lib/e2e-fixture";
 
 export type MemberProfile = {
   auth_user_id: string;
@@ -102,6 +104,17 @@ export type AppState = {
 };
 
 export async function getAppState(): Promise<AppState> {
+  if (isE2EMode()) {
+    const cookieStore = await cookies();
+    const userId = getFixtureAuthUserId(cookieStore);
+
+    if (!userId) {
+      redirect("/login");
+    }
+
+    return buildFixtureAppState(userId);
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: authData, error: authError } = await supabase.auth.getUser();
 

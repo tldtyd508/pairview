@@ -1,9 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { getFixtureAuthUserId, isE2EMode } from "@/lib/e2e-fixture";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
 import type { Database } from "@/lib/supabase/types";
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname === "/login";
+  const isProtectedApp = pathname.startsWith("/app");
+
+  if (isE2EMode()) {
+    const authUserId = getFixtureAuthUserId(request.cookies);
+
+    if (!authUserId && isProtectedApp) {
+      const redirectUrl = new URL("/login", request.url);
+      redirectUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (authUserId && isLoginPage) {
+      return NextResponse.redirect(new URL("/app", request.url));
+    }
+
+    return NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -38,10 +63,6 @@ export async function middleware(request: NextRequest) {
   );
 
   const { data } = await supabase.auth.getUser();
-  const pathname = request.nextUrl.pathname;
-  const isLoginPage = pathname === "/login";
-  const isProtectedApp = pathname.startsWith("/app");
-
   if (!data.user && isProtectedApp) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("next", pathname);

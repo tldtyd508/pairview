@@ -8,15 +8,20 @@ import { safeNextPath } from "@/lib/auth/redirect";
 type LoginPanelProps = {
   nextPath?: string | null;
   error?: string | null;
+  e2eMode?: boolean;
 };
 
-export default function LoginPanel({ nextPath, error }: LoginPanelProps) {
+export default function LoginPanel({ nextPath, error, e2eMode = false }: LoginPanelProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(true);
 
   useEffect(() => {
+    if (e2eMode) {
+      return;
+    }
+
     const supabase = createSupabaseBrowserClient();
 
     supabase.auth.getUser().then(({ data }) => {
@@ -27,9 +32,13 @@ export default function LoginPanel({ nextPath, error }: LoginPanelProps) {
 
       setRedirecting(false);
     });
-  }, [nextPath, router]);
+  }, [e2eMode, nextPath, router]);
 
   useEffect(() => {
+    if (e2eMode) {
+      return;
+    }
+
     if (!error) {
       return;
     }
@@ -40,7 +49,31 @@ export default function LoginPanel({ nextPath, error }: LoginPanelProps) {
     };
 
     setMessage(errors[error] ?? "로그인에 실패했다.");
-  }, [error]);
+  }, [e2eMode, error]);
+
+  if (e2eMode) {
+    async function handleFixtureSignIn() {
+      document.cookie = "pairview-fixture-auth=user-a; path=/";
+      startTransition(() => {
+        router.replace(safeNextPath(nextPath));
+      });
+    }
+
+    return (
+      <div className="grid gap-4">
+        <button
+          type="button"
+          onClick={handleFixtureSignIn}
+          className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
+        >
+          Google로 시작
+        </button>
+        {message ? (
+          <p className="text-sm leading-6 text-[var(--page-muted)]">{message}</p>
+        ) : null}
+      </div>
+    );
+  }
 
   async function handleGoogleSignIn() {
     const supabase = createSupabaseBrowserClient();

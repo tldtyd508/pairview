@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
+import OfflineNotice from "./offline-notice";
 import { site } from "@/lib/site-data";
 
 export const metadata: Metadata = {
@@ -42,6 +43,7 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         {children}
+        <OfflineNotice />
         <Analytics />
       </body>
     </html>
