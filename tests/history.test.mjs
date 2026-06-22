@@ -144,10 +144,19 @@ test("filterAndSortExperiences handles review state and score sort", () => {
 test("history UI and detail route are wired", () => {
   const appPage = read("app/app/page.tsx");
   const detailPage = read("app/history/[experienceId]/page.tsx");
+  const markerRoute = read("app/api/markers/route.ts");
+  const experienceMarkerRoute = read("app/api/experience-markers/route.ts");
+  const photoRoute = read("app/api/photos/route.ts");
 
   assert.match(appPage, /방문 히스토리/);
   assert.match(appPage, /필터 적용/);
+  assert.match(appPage, /마커 관리/);
   assert.match(detailPage, /Back to history/);
   assert.match(detailPage, /History detail/);
   assert.match(detailPage, /marker 없음/);
+  assert.match(detailPage, /마커 적용/);
+  assert.match(detailPage, /사진 업로드/);
+  assert.match(markerRoute, /missing-marker-fields/);
+  assert.match(experienceMarkerRoute, /experience_markers/);
+  assert.match(photoRoute, /photo-too-large/);
 });

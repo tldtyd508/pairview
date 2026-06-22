@@ -11,6 +11,7 @@ function read(relativePath) {
 
 test("supabase migration models the pair domain", () => {
   const migration = read("supabase/migrations/0001_initial_schema.sql");
+  const storageMigration = read("supabase/migrations/0003_storage_and_photos.sql");
 
   for (const tableName of [
     "public.users",
@@ -32,6 +33,11 @@ test("supabase migration models the pair domain", () => {
   assert.match(migration, /create policy "pair members can manage reviews"/);
   assert.match(migration, /unique \(user_id\)/);
   assert.match(migration, /public\.subjects[\s\S]*public\.experiences/);
+
+  assert.match(storageMigration, /create policy "pair members can read pairview objects"/);
+  assert.match(storageMigration, /create policy "pair members can create pairview objects"/);
+  assert.match(storageMigration, /pairview/);
+  assert.match(storageMigration, /image\/jpeg/);
 });
 
 test("supabase client helpers are present", () => {
@@ -49,6 +55,7 @@ test("schema docs and verification SQL exist", () => {
 
   assert.match(readme, /users/);
   assert.match(readme, /subjects/);
+  assert.match(readme, /storage bucket/);
   assert.match(readme, /Cross-pair access is denied/);
   assert.match(verification, /Pair B member/);
   assert.match(verification, /denied_subjects_for_pair_a/);

@@ -24,8 +24,9 @@ The schema keeps `subjects` separate from `experiences` so we can decide later w
 1. Create a Supabase project.
 2. Add Google as an auth provider in Supabase Auth.
 3. Run `supabase/migrations/0001_initial_schema.sql` in the SQL editor.
-4. Copy the project URL and anon key into `.env.local`.
-5. Set the redirect URL to the Vercel deployment and any local callback routes used later.
+4. Run `supabase/migrations/0002_pair_onboarding.sql` and `supabase/migrations/0003_storage_and_photos.sql` after the initial schema.
+5. Copy the project URL and anon key into `.env.local`.
+6. Set the redirect URL to the Vercel deployment and any local callback routes used later.
 
 ### Google auth provider
 
@@ -34,6 +35,12 @@ The schema keeps `subjects` separate from `experiences` so we can decide later w
   - `https://pairview.vercel.app/auth/callback`
   - `http://localhost:3000/auth/callback`
 - Make sure the Vercel deployment URL also matches whatever `NEXT_PUBLIC_SITE_URL` points to in production.
+
+### Storage bucket
+
+- The MVP stores optional experience photos in a private `pairview` storage bucket.
+- Photos are saved under a pair-scoped path, which lets RLS allow only the owning pair to read or mutate the object metadata.
+- Keep the bucket private; the app generates short-lived signed URLs when it renders photos.
 
 ## RLS notes
 

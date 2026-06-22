@@ -28,6 +28,20 @@ export type MarkerRow = {
   updated_at: string;
 };
 
+export type PhotoAttachmentRow = {
+  id: string;
+  pair_id: string;
+  experience_id: string;
+  storage_bucket: string;
+  storage_path: string;
+  caption: string | null;
+  sort_order: number;
+  created_by_user_id: string;
+  created_at: string;
+  updated_at: string;
+  signed_url: string | null;
+};
+
 export type SubjectRow = {
   id: string;
   pair_id: string;
@@ -66,6 +80,7 @@ export type ExperienceCard = ExperienceRow & {
   subject: SubjectRow | null;
   reviews: ReviewRow[];
   markers: MarkerRow[];
+  photoAttachments: PhotoAttachmentRow[];
 };
 
 export type AppState = {
@@ -82,6 +97,7 @@ export type AppState = {
     expires_at: string | null;
     created_by_user_id: string;
   } | null;
+  markers: MarkerRow[];
   experiences: ExperienceCard[];
 };
 
@@ -108,6 +124,7 @@ export async function getAppState(): Promise<AppState> {
       pair: null,
       members: [],
       invitation: null,
+      markers: [],
       experiences: [],
     };
   }
@@ -121,6 +138,7 @@ export async function getAppState(): Promise<AppState> {
     reviewsResult,
     experienceMarkersResult,
     markersResult,
+    photoAttachmentsResult,
   ] = await Promise.all([
     supabase
       .from("pairs")
@@ -165,6 +183,12 @@ export async function getAppState(): Promise<AppState> {
       .from("markers")
       .select("id, pair_id, name, color, icon, description, is_default, created_by_user_id, created_at, updated_at")
       .eq("pair_id", membership.pair_id),
+    supabase
+      .from("photo_attachments")
+      .select("id, pair_id, experience_id, storage_bucket, storage_path, caption, sort_order, created_by_user_id, created_at, updated_at")
+      .eq("pair_id", membership.pair_id)
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true }),
   ]);
 
   const memberIds = (membershipsResult.data ?? []).map((row) => row.user_id);
@@ -190,6 +214,35 @@ export async function getAppState(): Promise<AppState> {
   const markerById = new Map(
     (markersResult.data ?? []).map((marker) => [marker.id, marker]),
   );
+  const signedPhotoUrls = new Map<string, string | null>();
+  const photoAttachments = photoAttachmentsResult.data ?? [];
+
+  if (photoAttachments.length > 0) {
+    const signedResults = await Promise.all(
+      photoAttachments.map(async (attachment) => {
+        const { data, error } = await supabase.storage
+          .from(attachment.storage_bucket)
+          .createSignedUrl(attachment.storage_path, 60 * 60);
+
+        return [attachment.id, error ? null : data?.signedUrl ?? null] as const;
+      }),
+    );
+
+    for (const [attachmentId, signedUrl] of signedResults) {
+      signedPhotoUrls.set(attachmentId, signedUrl);
+    }
+  }
+
+  const photoAttachmentsByExperienceId = new Map<string, PhotoAttachmentRow[]>();
+  for (const attachment of photoAttachments) {
+    const entries = photoAttachmentsByExperienceId.get(attachment.experience_id) ?? [];
+    entries.push({
+      ...attachment,
+      signed_url: signedPhotoUrls.get(attachment.id) ?? null,
+    });
+    photoAttachmentsByExperienceId.set(attachment.experience_id, entries);
+  }
+
   const reviewsByExperienceId = new Map<string, ReviewRow[]>();
   for (const review of reviewsResult.data ?? []) {
     const entries = reviewsByExperienceId.get(review.experience_id) ?? [];
@@ -211,6 +264,7 @@ export async function getAppState(): Promise<AppState> {
       subject: subjectById.get(experience.subject_id) ?? null,
       reviews: reviewsByExperienceId.get(experience.id) ?? [],
       markers: markersByExperienceId.get(experience.id) ?? [],
+      photoAttachments: photoAttachmentsByExperienceId.get(experience.id) ?? [],
     }),
   );
 
@@ -220,6 +274,7 @@ export async function getAppState(): Promise<AppState> {
     pair: pairResult.data ?? null,
     members,
     invitation: invitationResult.data ?? null,
+    markers: markersResult.data ?? [],
     experiences,
   };
 }

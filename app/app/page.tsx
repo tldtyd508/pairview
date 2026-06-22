@@ -10,6 +10,8 @@ import {
 import type { Json } from "@/lib/supabase/types";
 import { site } from "@/lib/site-data";
 
+export const dynamic = "force-dynamic";
+
 type SearchParams = Record<string, string | string[] | undefined>;
 
 type AppPageProps = {
@@ -24,6 +26,10 @@ const errorMessages: Record<string, string> = {
   invitation_expired: "초대 코드가 만료됐다.",
   self_invitation_not_allowed: "자기 자신이 만든 초대에는 참여할 수 없다.",
   pair_is_full: "이 pair는 이미 2명으로 가득 찼다.",
+  "missing-marker-fields": "마커 이름, 색, 아이콘을 확인해라.",
+  "missing-photo-fields": "사진과 대상 기록을 확인해라.",
+  "invalid-photo-type": "사진은 JPEG, PNG, WebP, AVIF만 된다.",
+  "photo-too-large": "사진은 10MB 이하로 올려라.",
   "missing-code": "초대 코드를 입력해라.",
   "missing-restaurant-fields": "음식점 정보를 빠짐없이 적어라.",
   "missing-review-fields": "리뷰 점수와 본문을 확인해라.",
@@ -88,6 +94,18 @@ function messageFromParams(params: SearchParams | undefined) {
   }
   if (params.joined === "1") {
     return "초대 코드로 pair에 합류했다.";
+  }
+  if (params.marker_created === "1") {
+    return "마커를 추가했다.";
+  }
+  if (params.marker_applied === "1") {
+    return "마커를 붙였다.";
+  }
+  if (params.marker_removed === "1") {
+    return "마커를 제거했다.";
+  }
+  if (params.photo_uploaded === "1") {
+    return "사진을 올렸다.";
   }
   if (params.reviewed === "1") {
     return "리뷰를 저장했다.";
@@ -251,7 +269,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
     );
   }
 
-  const { current, partner } = memberPair(state);
+  const { partner } = memberPair(state);
   const pairLabel = state.pair?.label ?? "Unlabeled pair";
   const activeInvite = state.invitation?.code ?? null;
   const filters = parseExperienceFilters(params);
@@ -345,6 +363,91 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                   <p className="mt-4 text-sm text-white/70">
                     초대가 끝났거나 아직 생성되지 않았다.
                   </p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold">마커 관리</p>
+                  <p className="text-sm text-[var(--page-muted)]">
+                    pair 전용 마커를 수동으로 만든다. 초기 셋업은 셀카로 시작하면 된다.
+                  </p>
+                </div>
+                <div className="text-xs font-medium uppercase tracking-[0.24em] text-[var(--page-muted)]">
+                  pair markers
+                </div>
+              </div>
+
+              <form action="/api/markers" method="post" className="mt-5 grid gap-4">
+                <div className="grid gap-4 md:grid-cols-[1.2fr_0.7fr_0.8fr]">
+                  <label className="block text-sm">
+                    이름
+                    <input
+                      name="name"
+                      defaultValue="셀카"
+                      placeholder="예: 셀카"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    아이콘
+                    <input
+                      name="icon"
+                      defaultValue="📸"
+                      placeholder="📸"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 text-center text-lg outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    색상
+                    <input
+                      name="color"
+                      type="color"
+                      defaultValue="#ef6a4c"
+                      className="mt-2 h-[52px] w-full rounded-2xl border border-[var(--page-border)] bg-white px-3 py-2 outline-none"
+                    />
+                  </label>
+                </div>
+
+                <label className="block text-sm">
+                  설명
+                  <input
+                    name="description"
+                    placeholder="선택사항"
+                    className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                  />
+                </label>
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
+                  >
+                    마커 추가
+                  </button>
+                </div>
+              </form>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {state.markers.length === 0 ? (
+                  <span className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
+                    아직 만든 마커 없음
+                  </span>
+                ) : (
+                  state.markers.map((marker) => (
+                    <span
+                      key={marker.id}
+                      className="rounded-full px-3 py-1 text-xs font-medium"
+                      style={{
+                        background: `${marker.color}1A`,
+                        color: marker.color,
+                      }}
+                    >
+                      {marker.icon} {marker.name}
+                    </span>
+                  ))
                 )}
               </div>
             </div>
