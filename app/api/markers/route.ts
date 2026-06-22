@@ -4,6 +4,7 @@ import {
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
+import { getAuthenticatedUserId } from "@/lib/auth/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function normalizeText(value: FormDataEntryValue | null) {
@@ -47,16 +48,16 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const userId = await getAuthenticatedUserId(supabase);
 
-  if (authError || !authData.user) {
+  if (!userId) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const { data: membership } = await supabase
     .from("pair_memberships")
     .select("pair_id")
-    .eq("user_id", authData.user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (!membership) {
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     icon,
     color,
     description,
-    created_by_user_id: authData.user.id,
+    created_by_user_id: userId,
   });
 
   if (error) {

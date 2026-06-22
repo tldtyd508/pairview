@@ -5,6 +5,7 @@ import {
   getFixtureAuthUserId,
   isE2EMode,
 } from "@/lib/e2e-fixture";
+import { getAuthenticatedUserId } from "@/lib/auth/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 function normalizeText(value: FormDataEntryValue | null) {
@@ -50,9 +51,9 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
+  const userId = await getAuthenticatedUserId(supabase);
 
-  if (authError || !authData.user) {
+  if (!userId) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
   const { data: membership } = await supabase
     .from("pair_memberships")
     .select("pair_id")
-    .eq("user_id", authData.user.id)
+    .eq("user_id", userId)
     .eq("pair_id", experience.pair_id)
     .maybeSingle();
 
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       experience_id: experience.id,
       marker_id: marker.id,
       pair_id: experience.pair_id,
-      applied_by_user_id: authData.user.id,
+      applied_by_user_id: userId,
     },
     { onConflict: "experience_id,marker_id" },
   );
