@@ -27,6 +27,14 @@ The schema keeps `subjects` separate from `experiences` so we can decide later w
 4. Copy the project URL and anon key into `.env.local`.
 5. Set the redirect URL to the Vercel deployment and any local callback routes used later.
 
+### Google auth provider
+
+- Enable Google in Supabase Auth providers.
+- Add these redirect URLs:
+  - `https://pairview.vercel.app/auth/callback`
+  - `http://localhost:3000/auth/callback`
+- Make sure the Vercel deployment URL also matches whatever `NEXT_PUBLIC_SITE_URL` points to in production.
+
 ## RLS notes
 
 Every pair-owned table uses row-level security and the shared `public.is_pair_member(pair_uuid)` helper function.

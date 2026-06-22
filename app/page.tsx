@@ -1,4 +1,5 @@
 import { site } from "@/lib/site-data";
+import Link from "next/link";
 
 const highlights = [
   "두 사람의 점수는 따로 기록",
@@ -45,6 +46,12 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/login"
+                className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
+              >
+                Google로 시작
+              </Link>
               {highlights.map((item) => (
                 <span
                   key={item}
