@@ -15,6 +15,10 @@ test("auth route files are wired", () => {
   const callbackRoute = read("app/auth/callback/route.ts");
   const logoutRoute = read("app/logout/route.ts");
   const middleware = read("middleware.ts");
+  const createRoute = read("app/api/pairs/create/route.ts");
+  const joinRoute = read("app/api/pairs/join/route.ts");
+  const appPage = read("app/app/page.tsx");
+  const migration = read("supabase/migrations/0002_pair_onboarding.sql");
 
   assert.match(loginPanel, /signInWithOAuth/);
   assert.match(callbackRoute, /exchangeCodeForSession/);
@@ -22,6 +26,13 @@ test("auth route files are wired", () => {
   assert.match(logoutRoute, /signOut/);
   assert.match(middleware, /matcher:\s*\[\s*"\/app\/:path\*"/);
   assert.match(middleware, /\/login/);
+  assert.match(createRoute, /create_pair_with_invitation/);
+  assert.match(joinRoute, /join_pair_via_invitation/);
+  assert.match(appPage, /Pair setup/);
+  assert.match(appPage, /Invitation state/);
+  assert.match(migration, /shares_pair_with_user/);
+  assert.match(migration, /users can read pairmate profiles/);
+  assert.match(migration, /pair_is_full/);
   assert.match(loginPage, /Google 로그인/);
 });
 

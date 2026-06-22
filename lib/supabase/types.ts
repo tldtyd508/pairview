@@ -333,6 +333,31 @@ export type Database = {
         };
         Returns: boolean;
       };
+      shares_pair_with_user: {
+        Args: {
+          target_auth_user_id: string;
+        };
+        Returns: boolean;
+      };
+      create_pair_with_invitation: {
+        Args: {
+          pair_label?: string | null;
+        };
+        Returns: {
+          pair_id: string;
+          invitation_code: string;
+        }[];
+      };
+      join_pair_via_invitation: {
+        Args: {
+          invitation_code: string;
+        };
+        Returns: string;
+      };
+      generate_invitation_code: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

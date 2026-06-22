@@ -41,6 +41,8 @@ Every pair-owned table uses row-level security and the shared `public.is_pair_me
 
 That means a user can only see or mutate rows for a pair they belong to. Cross-pair access is denied in the database, not just hidden in the UI.
 
+Pairmate profile visibility is also handled in the database so the onboarding workspace can show both members without exposing unrelated users.
+
 ## Verification
 
 Use `supabase/tests/cross_pair_denial.sql` as the manual policy check template.
