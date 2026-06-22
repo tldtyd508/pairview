@@ -1,88 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getAppState, type AppState, type ExperienceCard } from "@/lib/app-state";
+import {
+  completionLabel,
+  filterAndSortExperiences,
+  parseHistoryFilters,
+  type HistoryFilters,
+} from "@/lib/history";
 import type { Json } from "@/lib/supabase/types";
 import { site } from "@/lib/site-data";
 
-type SearchParams = {
-  created?: string;
-  joined?: string;
-  reviewed?: string;
-  experience?: string;
-  error?: string;
-};
+type SearchParams = Record<string, string | string[] | undefined>;
 
 type AppPageProps = {
   searchParams?: Promise<SearchParams>;
-};
-
-type MemberProfile = {
-  auth_user_id: string;
-  display_name: string | null;
-  avatar_url: string | null;
-};
-
-type MemberRow = {
-  user_id: string;
-  role: string;
-  created_at: string;
-  profile: MemberProfile | null;
-};
-
-type ExperienceRow = {
-  id: string;
-  pair_id: string;
-  subject_id: string;
-  happened_on: string;
-  notes: string | null;
-  created_by_user_id: string;
-  created_at: string;
-  updated_at: string;
-};
-
-type SubjectRow = {
-  id: string;
-  pair_id: string;
-  kind: string;
-  title: string;
-  description: string | null;
-  metadata: Json;
-  created_by_user_id: string;
-  created_at: string;
-  updated_at: string;
-};
-
-type ReviewRow = {
-  id: string;
-  pair_id: string;
-  experience_id: string;
-  user_id: string;
-  score: number;
-  body: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-type ExperienceCard = ExperienceRow & {
-  subject: SubjectRow | null;
-  reviews: ReviewRow[];
-};
-
-type AppState = {
-  user: { id: string };
-  membership: { pair_id: string; role: string } | null;
-  pair: { id: string; label: string | null; created_at: string } | null;
-  members: MemberRow[];
-  invitation: {
-    code: string;
-    created_at: string;
-    uses_remaining: number;
-    accepted_at: string | null;
-    revoked_at: string | null;
-    expires_at: string | null;
-    created_by_user_id: string;
-  } | null;
-  experiences: ExperienceCard[];
 };
 
 const errorMessages: Record<string, string> = {
@@ -102,6 +33,18 @@ const errorMessages: Record<string, string> = {
 };
 
 const scoreOptions = Array.from({ length: 11 }, (_, index) => (index / 2).toFixed(1));
+const sortOptions = [
+  ["recent", "최근 방문"],
+  ["oldest", "오래된 방문"],
+  ["your_score", "내 점수"],
+  ["partner_score", "상대 점수"],
+] as const;
+const reviewStateOptions = [
+  ["all", "전체"],
+  ["none", "리뷰 없음"],
+  ["one", "한 명만"],
+  ["both", "둘 다"],
+] as const;
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("ko-KR", {
@@ -122,137 +65,106 @@ function formatScore(value: number) {
   return value.toFixed(1).replace(/\.0$/, "");
 }
 
-function isPlainObject(value: Json): value is Record<string, Json> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+function metadataObject(value: Json | null | undefined) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : null;
 }
 
-async function getAppState(): Promise<AppState> {
-  const supabase = await createSupabaseServerClient();
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !authData.user) {
-    redirect("/login");
-  }
-
-  const user = authData.user;
-
-  const { data: membership } = await supabase
-    .from("pair_memberships")
-    .select("pair_id, role")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!membership) {
-    return {
-      user,
-      membership: null,
-      pair: null,
-      members: [],
-      invitation: null,
-      experiences: [],
-    };
-  }
-
-  const [pairResult, membershipsResult, invitationResult, experiencesResult, subjectsResult, reviewsResult] =
-    await Promise.all([
-      supabase
-        .from("pairs")
-        .select("id, label, created_at")
-        .eq("id", membership.pair_id)
-        .maybeSingle(),
-      supabase
-        .from("pair_memberships")
-        .select("user_id, role, created_at")
-        .eq("pair_id", membership.pair_id)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("invitations")
-        .select("code, created_at, uses_remaining, accepted_at, revoked_at, expires_at, created_by_user_id")
-        .eq("pair_id", membership.pair_id)
-        .is("accepted_at", null)
-        .is("revoked_at", null)
-        .gt("uses_remaining", 0)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("experiences")
-        .select("id, pair_id, subject_id, happened_on, notes, created_by_user_id, created_at, updated_at")
-        .eq("pair_id", membership.pair_id)
-        .order("happened_on", { ascending: false })
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("subjects")
-        .select("id, pair_id, kind, title, description, metadata, created_by_user_id, created_at, updated_at")
-        .eq("pair_id", membership.pair_id),
-      supabase
-        .from("reviews")
-        .select("id, pair_id, experience_id, user_id, score, body, created_at, updated_at")
-        .eq("pair_id", membership.pair_id)
-        .order("created_at", { ascending: true }),
-    ]);
-
-  const memberIds = (membershipsResult.data ?? []).map((row) => row.user_id);
-  const profileResult = memberIds.length
-    ? await supabase
-        .from("users")
-        .select("auth_user_id, display_name, avatar_url")
-        .in("auth_user_id", memberIds)
-    : { data: [] };
-
-  const profileByAuthId = new Map(
-    (profileResult.data ?? []).map((profile) => [profile.auth_user_id, profile]),
-  );
-
-  const members: MemberRow[] = (membershipsResult.data ?? []).map((row) => ({
-    ...row,
-    profile: profileByAuthId.get(row.user_id) ?? null,
-  }));
-
-  const subjectById = new Map(
-    (subjectsResult.data ?? []).map((subject) => [subject.id, subject]),
-  );
-  const reviewsByExperienceId = new Map<string, ReviewRow[]>();
-  for (const review of reviewsResult.data ?? []) {
-    const entries = reviewsByExperienceId.get(review.experience_id) ?? [];
-    entries.push(review);
-    reviewsByExperienceId.set(review.experience_id, entries);
-  }
-
-  const experiences: ExperienceCard[] = (experiencesResult.data ?? []).map(
-    (experience) => ({
-      ...experience,
-      subject: subjectById.get(experience.subject_id) ?? null,
-      reviews: reviewsByExperienceId.get(experience.id) ?? [],
-    }),
-  );
-
-  return {
-    user,
-    membership,
-    pair: pairResult.data ?? null,
-    members,
-    invitation: invitationResult.data ?? null,
-    experiences,
-  };
+function textFromMetadata(experience: ExperienceCard, key: string) {
+  const metadata = metadataObject(experience.subject?.metadata);
+  const raw = metadata && key in metadata ? metadata[key] : null;
+  return typeof raw === "string" ? raw : "";
 }
 
-export default async function AppHome({
-  searchParams,
-}: AppPageProps) {
-  const params = searchParams ? await searchParams : undefined;
+function objectFromMetadata(experience: ExperienceCard) {
+  return metadataObject(experience.subject?.metadata);
+}
+
+function messageFromParams(params: SearchParams | undefined) {
+  if (!params) return null;
+  const error = typeof params.error === "string" ? params.error : null;
+  if (error) return errorMessages[error] ?? error;
+  if (params.created === "1") {
+    return "첫 방문 기록이 추가됐다. 이제 각자 리뷰를 채워라.";
+  }
+  if (params.joined === "1") {
+    return "초대 코드로 pair에 합류했다.";
+  }
+  if (params.reviewed === "1") {
+    return "리뷰를 저장했다.";
+  }
+  return null;
+}
+
+function FilterSelect({
+  label,
+  name,
+  defaultValue,
+  options,
+}: {
+  label: string;
+  name: string;
+  defaultValue: string;
+  options: readonly (readonly [string, string])[];
+}) {
+  return (
+    <label className="block text-sm">
+      {label}
+      <select
+        name={name}
+        defaultValue={defaultValue}
+        className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+      >
+        <option value="">전체</option>
+        {options.map(([value, title]) => (
+          <option key={value} value={value}>
+            {title}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+async function ensureSignedIn() {
   const state = await getAppState();
+  if (!state.membership) {
+    return state;
+  }
+  return state;
+}
 
-  const message =
-    params?.error
-      ? errorMessages[params.error] ?? params.error
-      : params?.created === "1"
-        ? "첫 방문 기록이 추가됐다. 이제 각자 리뷰를 채워라."
-        : params?.joined === "1"
-          ? "초대 코드로 pair에 합류했다."
-          : params?.reviewed === "1"
-            ? "리뷰를 저장했다."
-            : null;
+function parseExperienceFilters(params: SearchParams | undefined): HistoryFilters {
+  return parseHistoryFilters(params);
+}
+
+function historyEmptyMessage(filters: HistoryFilters) {
+  const activeCount =
+    Number(Boolean(filters.query)) +
+    Number(Boolean(filters.category)) +
+    Number(Boolean(filters.marker)) +
+    Number(filters.sort !== "recent") +
+    Number(filters.reviewState !== "all") +
+    Number(filters.minScore !== null) +
+    Number(filters.maxScore !== null) +
+    Number(Boolean(filters.from)) +
+    Number(Boolean(filters.to));
+
+  if (activeCount > 0) {
+    return "조건에 맞는 기록이 없다. 필터를 지우거나 검색어를 바꿔라.";
+  }
+
+  return "아직 기록이 없다. 첫 방문을 저장해라.";
+}
+
+function memberPair(state: AppState) {
+  const current = state.members.find((member) => member.user_id === state.user.id) ?? null;
+  const partner = state.members.find((member) => member.user_id !== state.user.id) ?? null;
+  return { current, partner };
+}
+
+export default async function AppHome({ searchParams }: AppPageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const state = await ensureSignedIn();
 
   if (!state.membership) {
     return (
@@ -272,12 +184,6 @@ export default async function AppHome({
               로그인은 끝났고, 이제 pair를 만든다. 여기서 생성한 초대 코드를
               상대에게 보내면 된다.
             </p>
-
-            {message ? (
-              <div className="mt-6 rounded-2xl border border-[var(--page-border)] bg-white/70 px-4 py-3 text-sm text-[var(--page-muted)]">
-                {message}
-              </div>
-            ) : null}
 
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               <form
@@ -345,9 +251,27 @@ export default async function AppHome({
     );
   }
 
+  const { current, partner } = memberPair(state);
   const pairLabel = state.pair?.label ?? "Unlabeled pair";
   const activeInvite = state.invitation?.code ?? null;
-  const pendingInviteState = activeInvite ? "Pending invite active" : "No active invite";
+  const filters = parseExperienceFilters(params);
+  const filteredExperiences = filterAndSortExperiences(
+    state.experiences,
+    filters,
+    state.user.id,
+    partner?.user_id ?? null,
+  );
+  const message = messageFromParams(params);
+  const filterActive =
+    Boolean(filters.query) ||
+    Boolean(filters.category) ||
+    Boolean(filters.marker) ||
+    filters.sort !== "recent" ||
+    filters.reviewState !== "all" ||
+    filters.minScore !== null ||
+    filters.maxScore !== null ||
+    Boolean(filters.from) ||
+    Boolean(filters.to);
 
   return (
     <main className="min-h-screen px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
@@ -402,7 +326,9 @@ export default async function AppHome({
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/55">
                   Invitation state
                 </p>
-                <div className="mt-4 text-lg font-medium">{pendingInviteState}</div>
+                <div className="mt-4 text-lg font-medium">
+                  {activeInvite ? "Pending invite active" : "No active invite"}
+                </div>
                 {activeInvite ? (
                   <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
                     <div className="text-xs uppercase tracking-[0.24em] text-white/55">
@@ -511,8 +437,8 @@ export default async function AppHome({
               </form>
             </div>
 
-            <div className="mt-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mt-4 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold">방문 히스토리</p>
                   <p className="text-sm text-[var(--page-muted)]">
@@ -520,157 +446,128 @@ export default async function AppHome({
                   </p>
                 </div>
                 <div className="text-sm text-[var(--page-muted)]">
-                  {state.experiences.length} records
+                  {filteredExperiences.length} / {state.experiences.length} records
                 </div>
               </div>
 
-              {state.experiences.length === 0 ? (
+              <form method="get" className="mt-5 grid gap-4 rounded-2xl border border-[var(--page-border)] bg-white p-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <label className="block text-sm">
+                    검색
+                    <input
+                      name="q"
+                      defaultValue={filters.query}
+                      placeholder="음식점, 위치, 메뉴"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    카테고리
+                    <input
+                      name="category"
+                      defaultValue={filters.category}
+                      placeholder="한식"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    마커
+                    <input
+                      name="marker"
+                      defaultValue={filters.marker}
+                      placeholder="셀카"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                    />
+                  </label>
+                  <FilterSelect
+                    label="정렬"
+                    name="sort"
+                    defaultValue={filters.sort}
+                    options={sortOptions}
+                  />
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  <FilterSelect
+                    label="리뷰 상태"
+                    name="review_state"
+                    defaultValue={filters.reviewState}
+                    options={reviewStateOptions}
+                  />
+                  <label className="block text-sm">
+                    최소 점수
+                    <input
+                      name="min_score"
+                      defaultValue={filters.minScore === null ? "" : String(filters.minScore)}
+                      inputMode="decimal"
+                      placeholder="4"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    최대 점수
+                    <input
+                      name="max_score"
+                      defaultValue={filters.maxScore === null ? "" : String(filters.maxScore)}
+                      inputMode="decimal"
+                      placeholder="5"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                    />
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <label className="block text-sm">
+                      시작일
+                      <input
+                        name="from"
+                        type="date"
+                        defaultValue={filters.from}
+                        className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                      />
+                    </label>
+                    <label className="block text-sm">
+                      종료일
+                      <input
+                        name="to"
+                        type="date"
+                        defaultValue={filters.to}
+                        className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="submit"
+                    className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
+                  >
+                    필터 적용
+                  </button>
+                  {filterActive ? (
+                    <Link
+                      href="/app"
+                      className="rounded-full border border-[var(--page-border)] bg-white px-5 py-3 text-sm font-medium text-[var(--page-text)]"
+                    >
+                      필터 초기화
+                    </Link>
+                  ) : null}
+                </div>
+              </form>
+
+              {filteredExperiences.length === 0 ? (
                 <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/50 p-6 text-sm text-[var(--page-muted)]">
-                  아직 기록이 없다. 첫 방문을 저장해라.
+                  {historyEmptyMessage(filters)}
                 </div>
               ) : (
                 <div className="mt-4 grid gap-4">
-                  {state.experiences.map((experience) => {
-                    const visitedBy =
-                      experience.created_by_user_id === state.user.id ? "You" : "Partner";
-                    const subject = experience.subject;
-                    const subjectMetadata = subject?.metadata && isPlainObject(subject.metadata)
-                      ? subject.metadata
-                      : null;
-                    const partnerReviews = new Map(
-                      experience.reviews.map((review) => [review.user_id, review]),
-                    );
-
-                    return (
-                      <article
-                        key={experience.id}
-                        className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5"
-                      >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
-                              {subject?.kind ?? "restaurant"}
-                            </div>
-                            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
-                              {subject?.title ?? "Untitled restaurant"}
-                            </h2>
-                          <p className="mt-2 text-sm text-[var(--page-muted)]">
-                            {subject?.description ?? "Location unavailable"} ·{" "}
-                            {typeof subjectMetadata?.category === "string"
-                              ? subjectMetadata.category
-                              : "Category n/a"}
-                          </p>
-                        </div>
-
-                          <div className="text-sm text-[var(--page-muted)]">
-                            <div>{formatDate(experience.happened_on)}</div>
-                            <div className="mt-1">{visitedBy}</div>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 rounded-2xl border border-[var(--page-border)] bg-[rgba(239,106,76,0.04)] px-4 py-3 text-sm text-[var(--page-muted)]">
-                          <div className="font-medium text-[var(--page-text)]">주문 메뉴</div>
-                          <div className="mt-1 whitespace-pre-wrap">
-                            {typeof subjectMetadata?.ordered_menus === "string"
-                              ? subjectMetadata.ordered_menus
-                              : experience.notes ?? "메뉴 정보 없음"}
-                          </div>
-                        </div>
-
-                        <div className="mt-5 grid gap-4 md:grid-cols-2">
-                          {state.members.map((member) => {
-                            const existingReview = partnerReviews.get(member.user_id) ?? null;
-
-                            return (
-                              <section
-                                key={`${experience.id}-${member.user_id}`}
-                                className="rounded-2xl border border-[var(--page-border)] bg-white p-4"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <div className="text-sm font-semibold">
-                                      {member.profile?.display_name ?? "Unnamed user"}
-                                    </div>
-                                    <div className="text-xs text-[var(--page-muted)]">
-                                      {member.user_id === state.user.id ? "Your review" : "Partner review"}
-                                    </div>
-                                  </div>
-                                  {existingReview ? (
-                                    <div className="rounded-full bg-[var(--page-accent-soft)] px-3 py-1 text-sm font-semibold text-[var(--page-text)]">
-                                      {formatScore(existingReview.score)}
-                                    </div>
-                                  ) : (
-                                    <div className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
-                                      아직 없음
-                                    </div>
-                                  )}
-                                </div>
-
-                                {member.user_id === state.user.id ? (
-                                  <form
-                                    action="/api/reviews"
-                                    method="post"
-                                    className="mt-4 grid gap-3"
-                                  >
-                                    <input
-                                      type="hidden"
-                                      name="experience_id"
-                                      value={experience.id}
-                                    />
-                                    <label className="block text-sm">
-                                      점수
-                                      <select
-                                        name="score"
-                                        defaultValue={
-                                          existingReview ? existingReview.score.toFixed(1) : "4.0"
-                                        }
-                                        className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
-                                      >
-                                        {scoreOptions.map((option) => (
-                                          <option key={option} value={option}>
-                                            {option}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </label>
-                                    <label className="block text-sm">
-                                      한줄평
-                                      <textarea
-                                        name="body"
-                                        rows={3}
-                                        defaultValue={existingReview?.body ?? ""}
-                                        placeholder="맛, 분위기, 재방문 의사"
-                                        className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
-                                      />
-                                    </label>
-                                    <div className="flex justify-end">
-                                      <button
-                                        type="submit"
-                                        className="rounded-full bg-[var(--page-accent)] px-4 py-2 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
-                                      >
-                                        저장
-                                      </button>
-                                    </div>
-                                  </form>
-                                ) : existingReview ? (
-                                  <div className="mt-4 rounded-2xl bg-[rgba(239,106,76,0.04)] px-4 py-3 text-sm leading-6">
-                                    {existingReview.body ? existingReview.body : "한줄평 없음"}
-                                    <div className="mt-2 text-xs text-[var(--page-muted)]">
-                                      {formatTime(existingReview.created_at)}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] px-4 py-3 text-sm text-[var(--page-muted)]">
-                                    아직 리뷰가 없다.
-                                  </div>
-                                )}
-                              </section>
-                            );
-                          })}
-                        </div>
-                      </article>
-                    );
-                  })}
+                  {filteredExperiences.map((experience) => (
+                    <ExperienceCardView
+                      key={experience.id}
+                      experience={experience}
+                      currentUserId={state.user.id}
+                      partnerUserId={partner?.user_id ?? null}
+                    />
+                  ))}
                 </div>
               )}
             </div>
@@ -693,5 +590,195 @@ export default async function AppHome({
         </div>
       </section>
     </main>
+  );
+}
+
+function ExperienceCardView({
+  experience,
+  currentUserId,
+  partnerUserId,
+}: {
+  experience: ExperienceCard;
+  currentUserId: string;
+  partnerUserId: string | null;
+}) {
+  const currentReview = experience.reviews.find((review) => review.user_id === currentUserId) ?? null;
+  const partnerReview = partnerUserId
+    ? experience.reviews.find((review) => review.user_id === partnerUserId) ?? null
+    : null;
+  const metadata = objectFromMetadata(experience);
+  const category = typeof metadata?.category === "string" ? metadata.category : "Category n/a";
+  const location = typeof metadata?.location === "string" ? metadata.location : "Location unavailable";
+  const orderedMenus = typeof metadata?.ordered_menus === "string" ? metadata.ordered_menus : experience.notes ?? "메뉴 정보 없음";
+
+  return (
+    <article className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
+            {experience.subject?.kind ?? "restaurant"}
+          </div>
+          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+            <Link href={`/history/${experience.id}`} className="hover:underline">
+              {experience.subject?.title ?? "Untitled restaurant"}
+            </Link>
+          </h2>
+          <p className="mt-2 text-sm text-[var(--page-muted)]">
+            {location} · {category}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {experience.markers.length === 0 ? (
+              <span className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
+                marker 없음
+              </span>
+            ) : (
+              experience.markers.map((marker) => (
+                <span
+                  key={marker.id}
+                  className="rounded-full px-3 py-1 text-xs font-medium"
+                  style={{
+                    background: `${marker.color}1A`,
+                    color: marker.color,
+                  }}
+                >
+                  {marker.icon} {marker.name}
+                </span>
+              ))
+            )}
+          </div>
+        </div>
+        <div className="text-sm text-[var(--page-muted)]">
+          <div>{formatDate(experience.happened_on)}</div>
+          <div className="mt-1">{completionLabel(experience.reviews.length)}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-[var(--page-border)] bg-[rgba(239,106,76,0.04)] px-4 py-3 text-sm text-[var(--page-muted)]">
+        <div className="font-medium text-[var(--page-text)]">주문 메뉴</div>
+        <div className="mt-1 whitespace-pre-wrap">{orderedMenus}</div>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <ReviewPanel
+          label="Your review"
+          displayName="You"
+          review={currentReview}
+          currentUser
+          experienceId={experience.id}
+        />
+        <ReviewPanel
+          label="Partner review"
+          displayName="Partner"
+          review={partnerReview}
+          currentUser={false}
+          experienceId={experience.id}
+        />
+      </div>
+    </article>
+  );
+}
+
+function ReviewPanel({
+  label,
+  displayName,
+  review,
+  currentUser,
+  experienceId,
+}: {
+  label: string;
+  displayName: string;
+  review: ExperienceCard["reviews"][number] | null;
+  currentUser: boolean;
+  experienceId: string;
+}) {
+  if (currentUser) {
+    return (
+      <section className="rounded-2xl border border-[var(--page-border)] bg-white p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm font-semibold">{displayName}</div>
+            <div className="text-xs text-[var(--page-muted)]">{label}</div>
+          </div>
+          {review ? (
+            <div className="rounded-full bg-[var(--page-accent-soft)] px-3 py-1 text-sm font-semibold text-[var(--page-text)]">
+              {formatScore(review.score)}
+            </div>
+          ) : (
+            <div className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
+              아직 없음
+            </div>
+          )}
+        </div>
+
+        <form action="/api/reviews" method="post" className="mt-4 grid gap-3">
+          <input type="hidden" name="experience_id" value={experienceId} />
+          <label className="block text-sm">
+            점수
+            <select
+              name="score"
+              defaultValue={review ? review.score.toFixed(1) : "4.0"}
+              className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+            >
+              {scoreOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block text-sm">
+            한줄평
+            <textarea
+              name="body"
+              rows={3}
+              defaultValue={review?.body ?? ""}
+              placeholder="맛, 분위기, 재방문 의사"
+              className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
+            />
+          </label>
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="rounded-full bg-[var(--page-accent)] px-4 py-2 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
+            >
+              저장
+            </button>
+          </div>
+        </form>
+      </section>
+    );
+  }
+
+  return (
+    <section className="rounded-2xl border border-[var(--page-border)] bg-white p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-sm font-semibold">{displayName}</div>
+          <div className="text-xs text-[var(--page-muted)]">{label}</div>
+        </div>
+        {review ? (
+          <div className="rounded-full bg-[var(--page-accent-soft)] px-3 py-1 text-sm font-semibold text-[var(--page-text)]">
+            {formatScore(review.score)}
+          </div>
+        ) : (
+          <div className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
+            아직 없음
+          </div>
+        )}
+      </div>
+
+      {review ? (
+        <div className="mt-4 rounded-2xl bg-[rgba(239,106,76,0.04)] px-4 py-3 text-sm leading-6">
+          {review.body ? review.body : "한줄평 없음"}
+          <div className="mt-2 text-xs text-[var(--page-muted)]">
+            {formatTime(review.created_at)}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] px-4 py-3 text-sm text-[var(--page-muted)]">
+          아직 리뷰가 없다.
+        </div>
+      )}
+    </section>
   );
 }
