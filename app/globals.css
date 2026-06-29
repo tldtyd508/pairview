@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Pretendard";
+  font-style: normal;
+  font-weight: 45 920;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/woff2/PretendardVariable.woff2")
+    format("woff2-variations");
+}
+
 :root {
   color-scheme: light;
   --page-bg: #f5eee4;
@@ -13,9 +22,9 @@
   --page-accent: #ef6a4c;
   --page-accent-soft: rgba(239, 106, 76, 0.14);
   --font-body:
-    "Avenir Next", "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo",
+    "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI",
     system-ui, sans-serif;
-  --font-display: "Iowan Old Style", "Baskerville", "Noto Serif KR", serif;
+  --font-display: var(--font-body);
 }
 
 html {

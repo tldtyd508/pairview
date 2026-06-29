@@ -98,7 +98,6 @@ export default async function HistoryDetailPage({
               </p>
               <h1
                 className="mt-4 text-3xl font-semibold sm:text-6xl"
-                style={{ fontFamily: "var(--font-display)" }}
               >
                 {experience.subject?.title ?? "이름 없는 음식점"}
               </h1>

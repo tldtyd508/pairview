@@ -35,7 +35,6 @@ export default function Home() {
 
             <h1
               className="mt-6 max-w-xl text-4xl font-semibold sm:text-7xl lg:text-8xl"
-              style={{ fontFamily: "var(--font-display)" }}
             >
               Pairview
             </h1>

@@ -126,7 +126,6 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
             <div className="min-w-0">
               <h1
                 className="text-3xl font-semibold sm:text-6xl"
-                style={{ fontFamily: "var(--font-display)" }}
               >
                 기록 남기기
               </h1>

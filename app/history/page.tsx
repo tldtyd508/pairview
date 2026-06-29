@@ -124,7 +124,6 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
             <div className="min-w-0">
               <h1
                 className="mt-4 text-3xl font-semibold sm:text-6xl"
-                style={{ fontFamily: "var(--font-display)" }}
               >
                 기록 보관함
               </h1>

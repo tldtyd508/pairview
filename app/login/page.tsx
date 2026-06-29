@@ -21,8 +21,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             로그인
           </p>
           <h1
-            className="mt-4 text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="mt-4 text-4xl font-semibold sm:text-6xl"
           >
             Pairview
           </h1>

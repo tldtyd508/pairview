@@ -192,7 +192,6 @@ export default async function AppHome({ searchParams }: AppPageProps) {
             </p>
             <h1
               className="mt-4 text-4xl font-semibold sm:text-6xl"
-              style={{ fontFamily: "var(--font-display)" }}
             >
               {site.name}
             </h1>
@@ -305,7 +304,6 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                 <div className="min-w-0">
                   <h1
                     className="text-3xl font-semibold sm:text-6xl"
-                    style={{ fontFamily: "var(--font-display)" }}
                   >
                     {pairLabel}
                   </h1>
