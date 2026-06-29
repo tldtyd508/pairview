@@ -105,7 +105,7 @@ function StatCard({
       <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--page-muted)]">
         {label}
       </div>
-      <div className="mt-2 text-2xl font-semibold tracking-[-0.05em]">{value}</div>
+      <div className="mt-2 text-2xl font-semibold">{value}</div>
       <div className="mt-2 text-sm leading-6 text-[var(--page-muted)]">{hint}</div>
     </div>
   );
@@ -122,7 +122,7 @@ function SectionTitle({
 }) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-semibold">{title}</p>
         <p className="text-sm text-[var(--page-muted)]">{subtitle}</p>
       </div>
@@ -150,7 +150,7 @@ function PendingReviewCard({
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
             {experience.subject?.kind ?? "음식점"}
           </div>
-          <h3 className="mt-2 text-xl font-semibold tracking-[-0.04em]">
+          <h3 className="mt-2 text-xl font-semibold">
             <Link href={`/evaluate?experience=${experience.id}`} className="hover:underline">
               {experience.subject?.title ?? "이름 없는 음식점"}
             </Link>
@@ -184,14 +184,14 @@ export default async function AppHome({ searchParams }: AppPageProps) {
 
   if (!state.membership) {
     return (
-      <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
+      <main className="min-h-screen px-4 py-5 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
         <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-4xl items-center">
-          <div className="w-full rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
+          <div className="w-full min-w-0 rounded-2xl border border-[var(--page-border)] bg-[var(--page-surface)] p-4 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:rounded-[2rem] sm:p-8">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
               커플 설정
             </p>
             <h1
-              className="mt-4 text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
+              className="mt-4 text-4xl font-semibold sm:text-6xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
               {site.name}
@@ -293,18 +293,18 @@ export default async function AppHome({ searchParams }: AppPageProps) {
   const markerCount = state.experiences.filter((experience) => experience.markers.length > 0).length;
 
   return (
-    <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
+    <main className="min-h-screen px-4 py-5 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
       <section className="mx-auto w-full max-w-6xl">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)]">
-          <div className="grid gap-4">
-            <header className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)]">
+          <div className="grid min-w-0 gap-4">
+            <header className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-[var(--page-surface)] p-4 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:rounded-[2rem] sm:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
                 대시보드
               </p>
               <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
+                <div className="min-w-0">
                   <h1
-                    className="text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
+                    className="text-3xl font-semibold sm:text-6xl"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
                     {pairLabel}
@@ -341,7 +341,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               </div>
             </header>
 
-            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+            <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
               <SectionTitle
                 title="평가 대기"
                 subtitle="아직 내 평가가 없는 기록부터 먼저 처리해요."
@@ -368,7 +368,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               )}
             </section>
 
-            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+            <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
               <SectionTitle
                 title="최근 기록"
                 subtitle="방금 저장했거나 다시 보고 싶은 기록이에요."
@@ -400,7 +400,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               )}
             </section>
 
-            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+            <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
               <SectionTitle
                 title="베스트 기록"
                 subtitle="두 사람 모두 높게 준 기록만 모아서 볼 수 있어요."
@@ -433,8 +433,8 @@ export default async function AppHome({ searchParams }: AppPageProps) {
             </section>
           </div>
 
-          <aside className="grid gap-4">
-            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+          <aside className="grid min-w-0 gap-4">
+            <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
               <p className="text-sm font-semibold">빠른 이동</p>
               <div className="mt-4 grid gap-2">
                 <Link
@@ -458,7 +458,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               </div>
             </section>
 
-            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+            <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
               <p className="text-sm font-semibold">기록 요약</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <StatCard
@@ -484,7 +484,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               </div>
             </section>
 
-            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-5 text-white">
+            <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-4 text-white sm:rounded-[1.75rem] sm:p-5">
               <div className="flex items-end justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold">커플 정보</p>

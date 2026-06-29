@@ -88,16 +88,16 @@ export default async function HistoryDetailPage({
   const message = messageFromParams(query);
 
   return (
-    <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
+    <main className="min-h-screen px-4 py-5 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
       <section className="mx-auto w-full max-w-4xl">
-        <div className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
+        <div className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-[var(--page-surface)] p-4 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:rounded-[2rem] sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
                 기록 상세
               </p>
               <h1
-                className="mt-4 text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
+                className="mt-4 text-3xl font-semibold sm:text-6xl"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {experience.subject?.title ?? "이름 없는 음식점"}

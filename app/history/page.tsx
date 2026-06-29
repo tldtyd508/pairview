@@ -114,16 +114,16 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
     Boolean(filters.to);
 
   return (
-    <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
+    <main className="min-h-screen px-4 py-5 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
       <section className="mx-auto w-full max-w-6xl">
-        <div className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
+        <div className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-[var(--page-surface)] p-4 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:rounded-[2rem] sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
             기록 보관함
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
+            <div className="min-w-0">
               <h1
-                className="mt-4 text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
+                className="mt-4 text-3xl font-semibold sm:text-6xl"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 기록 보관함
@@ -138,7 +138,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
 
           <details
             open={filterActive}
-            className="mt-8 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5"
+            className="mt-8 min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/70 p-4 sm:rounded-[1.75rem] sm:p-5"
           >
             <summary className="flex cursor-pointer list-none flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -152,7 +152,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
               </div>
             </summary>
 
-            <form method="get" className="mt-5 grid gap-4 rounded-2xl border border-[var(--page-border)] bg-white p-4">
+            <form method="get" className="mt-5 grid min-w-0 gap-4 rounded-2xl border border-[var(--page-border)] bg-white p-4">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <label className="block text-sm">
                   검색어
@@ -216,7 +216,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                     className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 outline-none"
                   />
                 </label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <label className="block text-sm">
                     시작일
                     <input

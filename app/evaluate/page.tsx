@@ -82,7 +82,7 @@ function SectionTitle({
 }) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-semibold">{title}</p>
         <p className="text-sm text-[var(--page-muted)]">{subtitle}</p>
       </div>
@@ -116,16 +116,16 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
   ].slice(0, 5);
 
   return (
-    <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
+    <main className="min-h-screen px-4 py-5 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
       <section className="mx-auto w-full max-w-6xl">
-        <div className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
+        <div className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-[var(--page-surface)] p-4 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:rounded-[2rem] sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
             평가 남기기
           </p>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
+            <div className="min-w-0">
               <h1
-                className="text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
+                className="text-3xl font-semibold sm:text-6xl"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 기록 남기기
@@ -143,9 +143,9 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
             </div>
           ) : null}
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.9fr)]">
-            <div className="grid gap-4">
-              <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+          <div className="mt-8 grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.9fr)]">
+            <div className="grid min-w-0 gap-4">
+              <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
                 <SectionTitle
                   title="새 음식점 기록"
                   subtitle="기록은 처음 방문 기준으로 남겨요."
@@ -226,7 +226,7 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
                 </form>
               </section>
 
-              <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
                 <SectionTitle
                   title="평가할 기록"
                   subtitle="아직 내 점수가 비어 있는 기록부터 처리해요."
@@ -267,7 +267,7 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
                 )}
               </section>
 
-              <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
                 <SectionTitle
                   title="마커 관리"
                   subtitle="특별히 남기고 싶은 순간에 마커를 수동으로 붙일 수 있어요."
@@ -346,8 +346,8 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
               </section>
             </div>
 
-            <aside className="grid gap-4">
-              <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-5 text-white">
+            <aside className="grid min-w-0 gap-4">
+              <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-4 text-white sm:rounded-[1.75rem] sm:p-5">
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/55">
                   커플 정보
                 </p>
@@ -373,7 +373,7 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
                 )}
               </section>
 
-              <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
                 <p className="text-sm font-semibold">커플 구성원</p>
                 <div className="mt-4 grid gap-3">
                   {state.members.map((member) => (

@@ -24,27 +24,23 @@ const guideSteps = [
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.7),transparent_36%)]" />
-      <div className="pointer-events-none absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-[var(--page-accent-soft)] blur-3xl" />
-      <div className="pointer-events-none absolute bottom-[-8rem] right-[-6rem] h-80 w-80 rounded-full bg-[rgba(79,70,229,0.12)] blur-3xl" />
-
-      <section className="relative mx-auto w-full max-w-6xl">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
-          <div className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8 lg:p-10">
+    <main className="min-h-screen px-4 py-5 text-[var(--page-text)] sm:px-8 sm:py-8">
+      <section className="mx-auto w-full max-w-6xl">
+        <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
+          <div className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-[var(--page-surface)] p-4 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:rounded-[2rem] sm:p-8 lg:p-10">
             <div className="inline-flex items-center gap-3 rounded-full border border-[var(--page-border)] bg-white/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
               <span className="h-2 w-2 rounded-full bg-[var(--page-accent)]" />
               커플 기록
             </div>
 
             <h1
-              className="mt-6 max-w-xl text-5xl font-semibold tracking-[-0.08em] sm:text-7xl lg:text-8xl"
+              className="mt-6 max-w-xl text-4xl font-semibold sm:text-7xl lg:text-8xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Pairview
             </h1>
 
-            <p className="mt-5 max-w-2xl text-2xl leading-tight tracking-[-0.04em] text-[var(--page-text)] sm:text-3xl lg:text-[2.5rem]">
+            <p className="mt-5 max-w-2xl text-xl leading-tight text-[var(--page-text)] sm:text-3xl lg:text-[2.5rem]">
               {site.tagline}
             </p>
 
@@ -71,7 +67,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="mt-8 grid gap-3 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
+            <div className="mt-8 grid gap-3 rounded-2xl border border-[var(--page-border)] bg-white/70 p-4 sm:rounded-[1.75rem] sm:p-5">
               {highlights.map((item) => (
                 <div
                   key={item.title}
@@ -89,8 +85,8 @@ export default function Home() {
             </div>
           </div>
 
-          <aside className="grid gap-4">
-            <div className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/75 p-5 shadow-[0_16px_50px_rgba(48,33,18,0.08)] backdrop-blur-md sm:p-6">
+          <aside className="grid min-w-0 gap-4">
+            <div className="rounded-2xl border border-[var(--page-border)] bg-white/75 p-4 shadow-[0_16px_50px_rgba(48,33,18,0.08)] backdrop-blur-md sm:rounded-[1.75rem] sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
                 사용 방식
               </p>
@@ -109,11 +105,11 @@ export default function Home() {
               </ol>
             </div>
 
-            <div className="rounded-[1.75rem] border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-5 text-white shadow-[0_16px_50px_rgba(48,33,18,0.22)] sm:p-6">
+            <div className="rounded-2xl border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-4 text-white shadow-[0_16px_50px_rgba(48,33,18,0.22)] sm:rounded-[1.75rem] sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/55">
                 도움말
               </p>
-              <p className="mt-4 text-lg font-medium tracking-[-0.03em]">
+              <p className="mt-4 text-lg font-medium">
                 특별히 좋았던 순간에는 마커를 남기고 사진을 붙여 둘 수 있어요.
               </p>
               <p className="mt-4 text-sm leading-6 text-white/72">

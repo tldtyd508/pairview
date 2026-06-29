@@ -77,7 +77,7 @@ function ReviewSummary({
   review: ExperienceCard["reviews"][number] | null;
 }) {
   return (
-    <section className="rounded-2xl border border-[var(--page-border)] bg-white p-4">
+    <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white p-4">
       <div className="flex items-center justify-between">
         <div>
           <div className="text-sm font-semibold">{label}</div>
@@ -118,7 +118,7 @@ function ReviewFormPanel({
   experienceId: string;
 }) {
   return (
-    <section className="rounded-2xl border border-[var(--page-border)] bg-white p-4">
+    <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white p-4">
       <div className="flex items-center justify-between">
         <div>
           <div className="text-sm font-semibold">나</div>
@@ -190,13 +190,13 @@ export function EvaluationExperienceCard({
   const { category, location, orderedMenus } = experienceDisplayData(experience);
 
   return (
-    <article className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
+    <article className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/70 p-4 sm:rounded-[1.75rem] sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
             {experience.subject?.kind ?? "음식점"}
           </div>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+          <h2 className="mt-2 break-words text-xl font-semibold sm:text-2xl">
             <Link href={`/history/${experience.id}`} className="hover:underline">
               {experience.subject?.title ?? "이름 없는 음식점"}
             </Link>
@@ -241,13 +241,13 @@ export function HistoryExperienceCard({
   const { category, location, orderedMenus } = experienceDisplayData(experience);
 
   return (
-    <article className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
+    <article className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/70 p-4 sm:rounded-[1.75rem] sm:p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
             {experience.subject?.kind ?? "음식점"}
           </div>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+          <h2 className="mt-2 break-words text-xl font-semibold sm:text-2xl">
             <Link href={`/history/${experience.id}`} className="hover:underline">
               {experience.subject?.title ?? "이름 없는 음식점"}
             </Link>
