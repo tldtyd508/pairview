@@ -323,20 +323,6 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                 </div>
               ) : null}
 
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/evaluate"
-                  className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
-                >
-                  평가 남기기
-                </Link>
-                <Link
-                  href="/history"
-                  className="rounded-full border border-[var(--page-border)] bg-white/80 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
-                >
-                  기록 보관함
-                </Link>
-              </div>
             </header>
 
             <section className="min-w-0 rounded-2xl border border-[var(--page-border)] bg-white/80 p-4 sm:rounded-[1.75rem] sm:p-5">
