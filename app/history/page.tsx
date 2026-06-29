@@ -120,10 +120,10 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
             기록 보관함
           </p>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="grid min-w-0 gap-4">
             <div className="min-w-0">
               <h1
-                className="mt-4 text-3xl font-semibold sm:text-6xl"
+                className="mt-4 break-keep text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl"
               >
                 기록 보관함
               </h1>
@@ -132,7 +132,9 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                 남길 수 있어요.
               </p>
             </div>
-            <WorkspaceNav active="history" />
+            <div className="w-full md:max-w-lg">
+              <WorkspaceNav active="history" />
+            </div>
           </div>
 
           <details

@@ -122,10 +122,10 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
             평가 남기기
           </p>
-          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="mt-4 grid min-w-0 gap-4">
             <div className="min-w-0">
               <h1
-                className="text-3xl font-semibold sm:text-6xl"
+                className="break-keep text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl"
               >
                 기록 남기기
               </h1>
@@ -133,7 +133,9 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
                 새 음식점 기록을 남기고, 아직 평가하지 않은 기록부터 차례대로 정리해요.
               </p>
             </div>
-            <WorkspaceNav active="evaluate" />
+            <div className="w-full md:max-w-lg">
+              <WorkspaceNav active="evaluate" />
+            </div>
           </div>
 
           {message ? (

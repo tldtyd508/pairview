@@ -97,7 +97,7 @@ export default async function HistoryDetailPage({
                 기록 상세
               </p>
               <h1
-                className="mt-4 text-3xl font-semibold sm:text-6xl"
+                className="mt-4 break-keep text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl"
               >
                 {experience.subject?.title ?? "이름 없는 음식점"}
               </h1>

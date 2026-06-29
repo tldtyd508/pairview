@@ -300,10 +300,10 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
                 대시보드
               </p>
-              <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="mt-4 grid min-w-0 gap-4">
                 <div className="min-w-0">
                   <h1
-                    className="text-3xl font-semibold sm:text-6xl"
+                    className="break-keep text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl"
                   >
                     {pairLabel}
                   </h1>
@@ -312,7 +312,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                     바로 볼 수 있어요.
                   </p>
                 </div>
-                <div className="self-start">
+                <div className="w-full md:max-w-lg">
                   <WorkspaceNav active="dashboard" />
                 </div>
               </div>
