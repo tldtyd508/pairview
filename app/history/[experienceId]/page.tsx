@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { WorkspaceNav } from "@/app/_components/workspace-nav";
 import { getAppState } from "@/lib/app-state";
 import type { Json } from "@/lib/supabase/types";
 
@@ -33,15 +34,25 @@ function metadataObject(value: Json | null | undefined) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : null;
 }
 
+const errorMessages: Record<string, string> = {
+  "missing-marker-fields": "마커 정보를 확인해 주세요.",
+  "missing-photo-fields": "사진 정보를 확인해 주세요.",
+  "invalid-photo-type": "사진은 JPEG, PNG, WebP, AVIF만 가능해요.",
+  "photo-too-large": "사진은 10MB 이하로 올려 주세요.",
+  experience_not_found: "기록을 찾지 못했어요.",
+  "experience-not-found": "기록을 찾지 못했어요.",
+  "forbidden-review": "이 기록에 접근할 권한이 없어요.",
+};
+
 function messageFromParams(params: Record<string, string | string[] | undefined> | undefined) {
   if (!params) return null;
 
-  if (params.marker_applied === "1") return "마커를 붙였다.";
-  if (params.marker_removed === "1") return "마커를 제거했다.";
-  if (params.photo_uploaded === "1") return "사진을 올렸다.";
+  if (params.marker_applied === "1") return "마커를 붙였어요.";
+  if (params.marker_removed === "1") return "마커를 제거했어요.";
+  if (params.photo_uploaded === "1") return "사진을 올렸어요.";
 
   const error = typeof params.error === "string" ? params.error : null;
-  if (error) return error;
+  if (error) return errorMessages[error] ?? "문제를 처리하지 못했어요.";
 
   return null;
 }
@@ -55,7 +66,7 @@ export default async function HistoryDetailPage({
   const state = await getAppState();
 
   if (!state.membership) {
-    redirect("/login");
+    redirect("/app");
   }
 
   const experience = state.experiences.find((entry) => entry.id === experienceId);
@@ -65,8 +76,8 @@ export default async function HistoryDetailPage({
   }
 
   const metadata = metadataObject(experience.subject?.metadata);
-  const location = typeof metadata?.location === "string" ? metadata.location : "Location unavailable";
-  const category = typeof metadata?.category === "string" ? metadata.category : "Category n/a";
+  const location = typeof metadata?.location === "string" ? metadata.location : "위치 정보 없음";
+  const category = typeof metadata?.category === "string" ? metadata.category : "카테고리 없음";
   const orderedMenus =
     typeof metadata?.ordered_menus === "string"
       ? metadata.ordered_menus
@@ -77,19 +88,19 @@ export default async function HistoryDetailPage({
   const message = messageFromParams(query);
 
   return (
-    <main className="min-h-screen px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
+    <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
       <section className="mx-auto w-full max-w-4xl">
         <div className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
-                History detail
+                기록 상세
               </p>
               <h1
                 className="mt-4 text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                {experience.subject?.title ?? "Untitled restaurant"}
+                {experience.subject?.title ?? "이름 없는 음식점"}
               </h1>
               <p className="mt-4 text-base leading-7 text-[var(--page-muted)]">
                 {location} · {category}
@@ -97,8 +108,12 @@ export default async function HistoryDetailPage({
             </div>
             <div className="text-sm text-[var(--page-muted)]">
               <div>{formatDate(experience.happened_on)}</div>
-              <div className="mt-1">{experience.markers.length} markers</div>
+              <div className="mt-1">{experience.markers.length}개 마커</div>
             </div>
+          </div>
+
+          <div className="mt-6">
+            <WorkspaceNav active="history" />
           </div>
 
           {message ? (
@@ -110,7 +125,7 @@ export default async function HistoryDetailPage({
           <div className="mt-6 flex flex-wrap gap-2">
             {experience.markers.length === 0 ? (
               <span className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
-                marker 없음
+                마커 없음
               </span>
             ) : (
               experience.markers.map((marker) => (
@@ -129,7 +144,7 @@ export default async function HistoryDetailPage({
           </div>
 
           <div className="mt-6 rounded-2xl border border-[var(--page-border)] bg-white/70 px-4 py-3 text-sm text-[var(--page-muted)]">
-            <div className="font-medium text-[var(--page-text)]">주문 메뉴</div>
+            <div className="font-medium text-[var(--page-text)]">주문한 메뉴</div>
             <div className="mt-1 whitespace-pre-wrap">{orderedMenus}</div>
           </div>
 
@@ -145,18 +160,18 @@ export default async function HistoryDetailPage({
               <div>
                 <div className="text-sm font-semibold">마커 적용</div>
                 <div className="text-xs text-[var(--page-muted)]">
-                  이 기록에 pair 마커를 수동으로 붙이거나 제거한다.
+                  이 기록에 마커를 수동으로 붙이거나 제거해요.
                 </div>
               </div>
               <div className="text-xs text-[var(--page-muted)]">
-                {state.markers.length} available
+                {state.markers.length}개 사용 가능
               </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
               {experience.markers.length === 0 ? (
                 <span className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
-                  아직 붙은 마커 없음
+                  아직 붙은 마커가 없어요
                 </span>
               ) : (
                 experience.markers.map((marker) => (
@@ -227,11 +242,11 @@ export default async function HistoryDetailPage({
               <div>
                 <div className="text-sm font-semibold">사진</div>
                 <div className="text-xs text-[var(--page-muted)]">
-                  선택한 파일을 private bucket에 저장하고 이 기록에 연결한다.
+                  선택한 사진을 이 기록에 연결해요.
                 </div>
               </div>
               <div className="text-xs text-[var(--page-muted)]">
-                {experience.photoAttachments.length} attached
+                {experience.photoAttachments.length}개 첨부
               </div>
             </div>
 
@@ -285,7 +300,7 @@ export default async function HistoryDetailPage({
                       />
                     ) : (
                       <div className="flex h-56 items-center justify-center bg-[rgba(239,106,76,0.04)] text-sm text-[var(--page-muted)]">
-                        사진을 불러올 수 없다.
+                        사진을 불러올 수 없어요.
                       </div>
                     )}
                     <figcaption className="px-4 py-3 text-sm text-[var(--page-muted)]">
@@ -298,7 +313,7 @@ export default async function HistoryDetailPage({
               </div>
             ) : (
               <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] px-4 py-3 text-sm text-[var(--page-muted)]">
-                아직 사진이 없다.
+                아직 사진이 없어요.
               </div>
             )}
           </div>
@@ -315,11 +330,11 @@ export default async function HistoryDetailPage({
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold">
-                        {member.profile?.display_name ?? "Unnamed user"}
+                    <div className="text-sm font-semibold">
+                        {member.profile?.display_name ?? "이름 없음"}
                       </div>
                       <div className="text-xs text-[var(--page-muted)]">
-                        {member.user_id === state.user.id ? "You" : "Partner"}
+                        {member.user_id === state.user.id ? "나" : "상대"}
                       </div>
                     </div>
                     {review ? (
@@ -342,7 +357,7 @@ export default async function HistoryDetailPage({
                     </div>
                   ) : (
                     <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] px-4 py-3 text-sm text-[var(--page-muted)]">
-                      아직 리뷰가 없다.
+                      아직 리뷰가 없어요.
                     </div>
                   )}
                 </section>
@@ -355,13 +370,13 @@ export default async function HistoryDetailPage({
               href="/history"
               className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
             >
-              Back to history
+              기록 보관함
             </Link>
             <Link
               href="/logout"
               className="rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
             >
-              Sign out
+              로그아웃
             </Link>
           </div>
         </div>

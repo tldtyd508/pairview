@@ -34,8 +34,8 @@ function objectFromMetadata(experience: ExperienceCard) {
 
 function experienceDisplayData(experience: ExperienceCard) {
   const metadata = objectFromMetadata(experience);
-  const category = typeof metadata?.category === "string" ? metadata.category : "Category n/a";
-  const location = typeof metadata?.location === "string" ? metadata.location : "Location unavailable";
+  const category = typeof metadata?.category === "string" ? metadata.category : "카테고리 없음";
+  const location = typeof metadata?.location === "string" ? metadata.location : "위치 정보 없음";
   const orderedMenus =
     typeof metadata?.ordered_menus === "string"
       ? metadata.ordered_menus
@@ -49,7 +49,7 @@ function MarkerList({ experience }: { experience: ExperienceCard }) {
     <div className="mt-3 flex flex-wrap gap-2">
       {experience.markers.length === 0 ? (
         <span className="rounded-full border border-[var(--page-border)] px-3 py-1 text-xs text-[var(--page-muted)]">
-          marker 없음
+          마커 없음
         </span>
       ) : (
         experience.markers.map((marker) => (
@@ -81,7 +81,7 @@ function ReviewSummary({
       <div className="flex items-center justify-between">
         <div>
           <div className="text-sm font-semibold">{label}</div>
-          <div className="text-xs text-[var(--page-muted)]">review</div>
+          <div className="text-xs text-[var(--page-muted)]">평가</div>
         </div>
         {review ? (
           <div className="rounded-full bg-[var(--page-accent-soft)] px-3 py-1 text-sm font-semibold text-[var(--page-text)]">
@@ -103,7 +103,7 @@ function ReviewSummary({
         </div>
       ) : (
         <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] px-4 py-3 text-sm text-[var(--page-muted)]">
-          아직 리뷰가 없다.
+          아직 리뷰가 없어요.
         </div>
       )}
     </section>
@@ -121,8 +121,8 @@ function ReviewFormPanel({
     <section className="rounded-2xl border border-[var(--page-border)] bg-white p-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold">You</div>
-          <div className="text-xs text-[var(--page-muted)]">Your review</div>
+          <div className="text-sm font-semibold">나</div>
+          <div className="text-xs text-[var(--page-muted)]">내 평가</div>
         </div>
         {review ? (
           <div className="rounded-full bg-[var(--page-accent-soft)] px-3 py-1 text-sm font-semibold text-[var(--page-text)]">
@@ -194,11 +194,11 @@ export function EvaluationExperienceCard({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
-            {experience.subject?.kind ?? "restaurant"}
+            {experience.subject?.kind ?? "음식점"}
           </div>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
             <Link href={`/history/${experience.id}`} className="hover:underline">
-              {experience.subject?.title ?? "Untitled restaurant"}
+              {experience.subject?.title ?? "이름 없는 음식점"}
             </Link>
           </h2>
           <p className="mt-2 text-sm text-[var(--page-muted)]">
@@ -219,7 +219,7 @@ export function EvaluationExperienceCard({
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         <ReviewFormPanel review={currentReview} experienceId={experience.id} />
-        <ReviewSummary label="Partner" review={partnerReview} />
+        <ReviewSummary label="상대" review={partnerReview} />
       </div>
     </article>
   );
@@ -245,11 +245,11 @@ export function HistoryExperienceCard({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
-            {experience.subject?.kind ?? "restaurant"}
+            {experience.subject?.kind ?? "음식점"}
           </div>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
             <Link href={`/history/${experience.id}`} className="hover:underline">
-              {experience.subject?.title ?? "Untitled restaurant"}
+              {experience.subject?.title ?? "이름 없는 음식점"}
             </Link>
           </h2>
           <p className="mt-2 text-sm text-[var(--page-muted)]">
@@ -269,8 +269,8 @@ export function HistoryExperienceCard({
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2">
-        <ReviewSummary label="You" review={currentReview} />
-        <ReviewSummary label="Partner" review={partnerReview} />
+        <ReviewSummary label="나" review={currentReview} />
+        <ReviewSummary label="상대" review={partnerReview} />
       </div>
     </article>
   );

@@ -357,3 +357,241 @@ Make the dashboard feel like PairView's home rather than an admin stats screen.
 npm run lint
 npm run build
 ```
+
+## 14. Replace implementation-note copy with user-facing help
+
+### Goal
+
+Remove or rewrite UI copy that sounds like internal planning notes, implementation comments, or developer instructions.
+
+### Scope
+
+- Review user-facing strings in:
+  - `app/page.tsx`
+  - `app/login/page.tsx`
+  - `app/app/page.tsx`
+  - `app/evaluate/page.tsx`
+  - `app/history/page.tsx`
+  - `app/history/[experienceId]/page.tsx`
+  - shared components under `app/_components/`
+- Rewrite copy that exposes implementation details or route names, including:
+  - `Coming soon`
+  - `onboarding`
+  - `repeat behavior`
+  - `private bucket`
+  - raw route names such as `/evaluate` in visible prose
+  - future-roadmap phrasing such as "먼저 ... 나중에 ..."
+- Convert harsh command-style wording into helpful user guidance.
+  - Avoid phrases like `저장해라`, `채워라`, `확인해라`.
+  - Prefer `저장해 주세요`, `평가를 남기면 볼 수 있어요`, or a concise neutral state.
+- Keep technical details in docs only, not in the rendered UI.
+- Do not change data flow, routes, database schema, authentication, or form behavior in this ticket.
+
+### Suggested copy direction
+
+- Landing page:
+  - Replace planning copy with a short product explanation.
+  - Focus on "둘이 남기는 기록", "각자의 점수", "한줄평", and "좋았던 순간".
+- Login page:
+  - Replace route/onboarding wording with sign-in guidance.
+- Dashboard:
+  - Empty states should explain the next user action without mentioning internal paths.
+- Evaluate page:
+  - Keep field instructions practical and short.
+  - Replace implementation terms with user concepts, e.g. `재방문 정책` instead of `repeat behavior` if needed.
+- Detail page:
+  - Explain photo upload as "이 기록에 사진을 남겨요", not storage mechanics.
+
+### Acceptance criteria
+
+- No visible UI copy contains `Coming soon`, `onboarding`, `repeat behavior`, or `private bucket`.
+- Visible UI prose does not mention raw internal routes such as `/evaluate` or `/app`.
+- Empty/error/success messages use a consistent polite-neutral Korean tone.
+- Tests that assert visible copy are updated only where wording changed.
+- No behavior changes are introduced.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+## 15. Make the public landing page mobile-first and less demo-like
+
+### Goal
+
+Make the unauthenticated home page feel like a real Pairview entry point on mobile, not a design placeholder or product-planning mock.
+
+### Scope
+
+- Update `app/page.tsx`.
+- Design for a mobile viewport first, then scale up for desktop.
+- Keep the first screen focused on:
+  - Pairview name
+  - one short value proposition
+  - Google sign-in CTA
+  - 2-3 compact benefit chips or rows
+- Remove or reduce demo-only sections such as `Snapshot` and `Marker rule` if they do not help a first-time user.
+- If marker explanation remains, word it as user help:
+  - Example: "특별히 좋았던 순간에는 마커를 남길 수 있어요."
+- Avoid large desktop-only composition that creates awkward mobile scrolling.
+- Do not add marketing pages, external images, or new dependencies.
+
+### Acceptance criteria
+
+- At 390px width, the main CTA is visible without excessive scrolling.
+- Landing copy does not read like roadmap notes.
+- The page remains visually consistent with Pairview's existing typography and colors.
+- Desktop still renders cleanly, but mobile is the primary target.
+- No authenticated app behavior changes.
+
+### Validation
+
+```bash
+npm run lint
+npm run build
+```
+
+Use Playwright or an equivalent browser check to inspect at least:
+
+```text
+390x844
+1280x900
+```
+
+## 16. Add mobile-first workspace navigation
+
+### Goal
+
+Make the authenticated workspace easier to use on phones by making the primary navigation thumb-friendly and always predictable.
+
+### Scope
+
+- Update `app/_components/workspace-nav.tsx`.
+- Keep the current destinations:
+  - `/app`
+  - `/evaluate`
+  - `/history`
+- On mobile, present navigation as a bottom bar or similarly thumb-friendly control.
+- On wider screens, keep a compact top navigation if it fits the existing layout better.
+- Ensure active state is clear without relying only on color.
+- Account for safe-area inset on mobile browsers.
+- Avoid adding icon libraries unless already available in the project.
+- Do not change route names or page-level behavior in this ticket.
+
+### Acceptance criteria
+
+- `/app`, `/evaluate`, and `/history` all show a usable navigation control on mobile.
+- The active page is visually identifiable.
+- Bottom navigation does not cover important form buttons or page content.
+- Keyboard focus states remain visible.
+- Existing tests for navigation labels still pass or are updated to the new markup.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+Use browser checks at mobile width for:
+
+```text
+/app
+/evaluate
+/history
+```
+
+## 17. Reflow dashboard for mobile-first usage
+
+### Goal
+
+Make `/app` useful as the first authenticated screen on a phone, prioritizing records and pending actions over stats.
+
+### Scope
+
+- Update `app/app/page.tsx`.
+- Keep onboarding behavior for signed-in users without a pair.
+- For users with a pair, order mobile content as:
+  - short page header
+  - `평가 대기`
+  - `최근 기록`
+  - `베스트 기록`
+  - supporting counts or pair status
+- Reduce the visual weight of summary count cards.
+- Keep CTAs concise:
+  - `평가 남기기`
+  - `새 기록`
+  - `전체 보기`
+- Empty states should be short and helpful.
+- Do not introduce new data queries if existing `getAppState()` data is enough.
+
+### Acceptance criteria
+
+- At mobile width, pending reviews and recent records appear before stat cards.
+- The dashboard does not look like an admin analytics page.
+- Existing recent, best, and pending sections remain present.
+- No average score is introduced.
+- Dashboard links still point to the correct routes.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+Use browser checks at:
+
+```text
+390x844 /app
+1280x900 /app
+```
+
+## 18. Reflow evaluation and history screens for mobile
+
+### Goal
+
+Make record entry and archive browsing comfortable on phones without changing the underlying workflows.
+
+### Scope
+
+- Update `app/evaluate/page.tsx` and `app/history/page.tsx`.
+- Evaluate page:
+  - Put pending/current review work before secondary setup panels where practical.
+  - Keep the new-record form easy to find.
+  - Avoid long explanatory paragraphs above the user's main action.
+  - Keep marker setup available but visually secondary.
+- History page:
+  - Make filters less dominant on mobile.
+  - Consider grouping filters behind a compact `필터` area or making the controls wrap cleanly.
+  - Keep sort/search URL state behavior intact.
+- Do not change API routes, schema, or history filtering semantics.
+
+### Acceptance criteria
+
+- Mobile evaluation flow makes it obvious where to add a record and where to review.
+- Mobile history flow makes it obvious how to search, sort, and clear filters.
+- Existing history query behavior is unchanged.
+- No desktop regression in basic layout.
+- Tests covering history and evaluation UI pass after copy/layout changes.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+Use browser checks at mobile width for:
+
+```text
+/evaluate
+/history
+/history?sort=best
+```

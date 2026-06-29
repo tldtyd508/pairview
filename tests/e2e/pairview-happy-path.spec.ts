@@ -32,13 +32,13 @@ test("pairview happy path", async ({ browser }) => {
   const ownerPage = await owner.newPage();
 
   await ownerPage.goto("/app");
-  await expect(ownerPage.getByText("Pair setup")).toBeVisible();
+  await expect(ownerPage.getByText("커플 설정")).toBeVisible();
 
-  await ownerPage.getByLabel("Pair label").fill("우리 커플");
-  await ownerPage.getByRole("button", { name: "Pair 만들기" }).click();
+  await ownerPage.getByLabel("커플 이름").fill("우리 커플");
+  await ownerPage.getByRole("button", { name: "커플 만들기" }).click();
   await expect(ownerPage.getByText("최근 기록", { exact: true })).toBeVisible();
   await expect(ownerPage.getByText("베스트 기록", { exact: true })).toBeVisible();
-  await expect(ownerPage.getByText("PAIRVIEW", { exact: true })).toBeVisible();
+  await expect(ownerPage.getByText("대시보드", { exact: true })).toBeVisible();
 
   await ownerPage.goto("/evaluate");
   await expect(ownerPage.getByRole("heading", { name: "평가 남기기" })).toBeVisible();
@@ -47,7 +47,7 @@ test("pairview happy path", async ({ browser }) => {
   await ownerPage.getByLabel("아이콘").fill("📸");
   await ownerPage.getByLabel("색상").fill("#ef6a4c");
   await ownerPage.getByRole("button", { name: "마커 추가" }).click();
-  await expect(ownerPage.getByText("마커를 추가했다.")).toBeVisible();
+  await expect(ownerPage.getByText("마커를 추가했어요.")).toBeVisible();
 
   await ownerPage.getByLabel("음식점 이름").fill("Mellow Table");
   await ownerPage.getByLabel("위치").fill("Seoul Forest");
@@ -56,7 +56,7 @@ test("pairview happy path", async ({ browser }) => {
   await ownerPage.getByLabel("주문한 메뉴").fill("truffle pasta");
   await ownerPage.getByLabel("메모").fill("데이트 코스");
   await ownerPage.getByRole("button", { name: "기록 저장" }).click();
-  await expect(ownerPage.getByText("첫 방문 기록이 추가됐다")).toBeVisible();
+  await expect(ownerPage.getByText("첫 방문 기록이 추가됐어요")).toBeVisible();
 
   const createdExperienceUrl = new URL(ownerPage.url());
   const experienceId = createdExperienceUrl.searchParams.get("experience");
@@ -65,23 +65,23 @@ test("pairview happy path", async ({ browser }) => {
   await ownerPage.locator('select[name="score"]').selectOption("4.5");
   await ownerPage.getByLabel("한줄평").fill("분위기가 좋았다.");
   await ownerPage.getByRole("button", { name: "저장", exact: true }).click();
-  await expect(ownerPage.getByText("리뷰를 저장했다.")).toBeVisible();
+  await expect(ownerPage.getByText("평가를 저장했어요.")).toBeVisible();
 
   const partner = await browser.newContext();
   await partner.addCookies([partnerAuthCookie]);
   const partnerPage = await partner.newPage();
 
   await partnerPage.goto("/app");
-  await expect(partnerPage.getByText("Join with code")).toBeVisible();
-  await partnerPage.getByLabel("Invitation code").fill("PAIRVIEW");
-  await partnerPage.getByRole("button", { name: "Join pair" }).click();
+  await expect(partnerPage.getByText("초대 코드로 합류")).toBeVisible();
+  await partnerPage.getByLabel("초대 코드").fill("PAIRVIEW");
+  await partnerPage.getByRole("button", { name: "합류하기" }).click();
   await expect(partnerPage.getByText("최근 기록", { exact: true })).toBeVisible();
 
   await partnerPage.goto(`/evaluate?experience=${experienceId}`);
   await partnerPage.locator('select[name="score"]').selectOption("5.0");
   await partnerPage.getByLabel("한줄평").fill("재방문할 만하다.");
   await partnerPage.getByRole("button", { name: "저장", exact: true }).click();
-  await expect(partnerPage.getByText("리뷰를 저장했다.")).toBeVisible();
+  await expect(partnerPage.getByText("평가를 저장했어요.")).toBeVisible();
 
   await ownerPage.goto("/app");
   await expect(ownerPage.getByText("최근 기록", { exact: true })).toBeVisible();
@@ -90,10 +90,10 @@ test("pairview happy path", async ({ browser }) => {
 
   await ownerPage.getByRole("link", { name: "Mellow Table" }).first().click();
   await expect(ownerPage).toHaveURL(/\/history\//);
-  await expect(ownerPage.getByText("History detail")).toBeVisible();
+  await expect(ownerPage.getByText("기록 상세")).toBeVisible();
 
   await ownerPage.getByRole("button", { name: "마커 붙이기" }).click();
-  await expect(ownerPage.getByText("마커를 붙였다.")).toBeVisible();
+  await expect(ownerPage.getByText("마커를 붙였어요.")).toBeVisible();
 
   await ownerPage.getByLabel("사진 파일").setInputFiles({
     name: "pairview.png",
@@ -102,7 +102,7 @@ test("pairview happy path", async ({ browser }) => {
   });
   await ownerPage.getByLabel("설명").fill("셀카");
   await ownerPage.getByRole("button", { name: "사진 업로드" }).click();
-  await expect(ownerPage.getByText("사진을 올렸다.")).toBeVisible();
+  await expect(ownerPage.getByText("사진을 올렸어요.")).toBeVisible();
   await expect(ownerPage.getByRole("img", { name: "셀카" })).toBeVisible();
   await expect(ownerPage.getByRole("button", { name: "📸 셀카 ×" })).toBeVisible();
 

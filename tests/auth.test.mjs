@@ -10,6 +10,7 @@ function read(relativePath) {
 }
 
 test("auth route files are wired", () => {
+  const landingPage = read("app/page.tsx");
   const loginPage = read("app/login/page.tsx");
   const loginPanel = read("app/login/login-panel.tsx");
   const callbackRoute = read("app/auth/callback/route.ts");
@@ -52,16 +53,23 @@ test("auth route files are wired", () => {
   assert.doesNotMatch(middleware, /auth\.getUser/);
   assert.match(appPage, /최근 기록/);
   assert.match(appPage, /베스트 기록/);
+  assert.match(appPage, /평가 대기/);
+  assert.doesNotMatch(appPage, /onboarding/);
   assert.match(workspaceNav, /대시보드/);
   assert.match(workspaceNav, /평가 남기기/);
   assert.match(workspaceNav, /기록 보관함/);
+  assert.match(evaluatePage, /기록 남기기/);
   assert.match(evaluatePage, /새 음식점 기록/);
-  assert.match(evaluatePage, /첫 방문만 새 기록/);
-  assert.match(evaluatePage, /리뷰를 저장했다/);
+  assert.match(evaluatePage, /기록은 처음 방문 기준/);
+  assert.match(evaluatePage, /평가를 저장했어요/);
+  assert.match(landingPage, /Google로 시작/);
+  assert.match(landingPage, /각자 점수/);
+  assert.match(landingPage, /마커를 남기고 사진을 붙여 둘 수 있어요/);
+  assert.doesNotMatch(landingPage, /Coming soon/);
   assert.match(migration, /shares_pair_with_user/);
   assert.match(migration, /users can read pairmate profiles/);
   assert.match(migration, /pair_is_full/);
-  assert.match(loginPage, /Google 로그인/);
+  assert.match(loginPage, /Google 계정으로 로그인하면/);
 });
 
 test("auth redirect helper is safe", () => {

@@ -75,10 +75,10 @@ function historyEmptyMessage(filters: HistoryFilters) {
     Number(Boolean(filters.to));
 
   if (activeCount > 0) {
-    return "조건에 맞는 기록이 없다. 필터를 지우거나 검색어를 바꿔라.";
+    return "조건에 맞는 기록이 없어요. 필터를 지우거나 검색어를 바꿔보세요.";
   }
 
-  return "아직 기록이 없다. 평가 화면에서 첫 방문을 저장해라.";
+  return "아직 기록이 없어요. 평가 화면에서 첫 기록을 남겨보세요.";
 }
 
 function memberPair(state: AppState) {
@@ -114,11 +114,11 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
     Boolean(filters.to);
 
   return (
-    <main className="min-h-screen px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
+    <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
       <section className="mx-auto w-full max-w-6xl">
         <div className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
-            Pair archive
+            기록 보관함
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -129,29 +129,33 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                 기록 보관함
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--page-muted)]">
-                검색과 필터는 여기에서만 관리한다. 평가 입력은 평가 화면에서 처리한다.
+                검색, 정렬, 필터는 여기에서 관리해요. 평가는 평가 화면에서 이어서
+                남길 수 있어요.
               </p>
             </div>
             <WorkspaceNav active="history" />
           </div>
 
-          <div className="mt-8 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <details
+            open={filterActive}
+            className="mt-8 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5"
+          >
+            <summary className="flex cursor-pointer list-none flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-sm font-semibold">히스토리 검색</p>
-                <p className="text-sm text-[var(--page-muted)]">
-                  평균 점수는 없고, 각자의 리뷰만 나란히 본다.
+                <div className="text-sm font-semibold">기록 검색과 필터</div>
+                <p className="mt-1 text-sm text-[var(--page-muted)]">
+                  평균은 없고, 각자의 리뷰를 나란히 볼 수 있어요.
                 </p>
               </div>
               <div className="text-sm text-[var(--page-muted)]">
-                {filteredExperiences.length} / {state.experiences.length} records
+                {filteredExperiences.length} / {state.experiences.length}개 기록
               </div>
-            </div>
+            </summary>
 
             <form method="get" className="mt-5 grid gap-4 rounded-2xl border border-[var(--page-border)] bg-white p-4">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <label className="block text-sm">
-                  검색
+                  검색어
                   <input
                     name="q"
                     defaultValue={filters.query}
@@ -251,7 +255,9 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                 ) : null}
               </div>
             </form>
+          </details>
 
+          <div className="mt-4">
             {filteredExperiences.length === 0 ? (
               <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/50 p-6 text-sm text-[var(--page-muted)]">
                 {historyEmptyMessage(filters)}
@@ -292,7 +298,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
               href="/logout"
               className="rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
             >
-              Sign out
+              로그아웃
             </Link>
           </div>
         </div>

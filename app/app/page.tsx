@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { HistoryExperienceCard } from "@/app/_components/experience-cards";
 import { WorkspaceNav } from "@/app/_components/workspace-nav";
 import { getAppState, type AppState } from "@/lib/app-state";
@@ -14,23 +15,23 @@ type AppPageProps = {
 };
 
 const errorMessages: Record<string, string> = {
-  authentication_required: "로그인이 필요하다.",
-  user_already_in_pair: "이미 다른 pair에 속해 있다.",
-  invalid_invitation: "초대 코드가 유효하지 않다.",
-  invitation_already_used: "이미 사용된 초대 코드다.",
-  invitation_expired: "초대 코드가 만료됐다.",
-  self_invitation_not_allowed: "자기 자신이 만든 초대에는 참여할 수 없다.",
-  pair_is_full: "이 pair는 이미 2명으로 가득 찼다.",
-  "missing-marker-fields": "마커 이름, 색, 아이콘을 확인해라.",
-  "missing-photo-fields": "사진과 대상 기록을 확인해라.",
-  "invalid-photo-type": "사진은 JPEG, PNG, WebP, AVIF만 된다.",
-  "photo-too-large": "사진은 10MB 이하로 올려라.",
-  "missing-code": "초대 코드를 입력해라.",
-  "missing-restaurant-fields": "음식점 정보를 빠짐없이 적어라.",
-  "missing-review-fields": "리뷰 점수와 본문을 확인해라.",
-  "invalid-score": "점수는 0에서 5 사이여야 한다.",
-  "experience-not-found": "해당 기록을 찾지 못했다.",
-  "forbidden-review": "이 기록에 대한 리뷰 권한이 없다.",
+  authentication_required: "로그인이 필요해요.",
+  user_already_in_pair: "이미 다른 커플에 속해 있어요.",
+  invalid_invitation: "초대 코드가 유효하지 않아요.",
+  invitation_already_used: "이미 사용된 초대 코드예요.",
+  invitation_expired: "초대 코드가 만료됐어요.",
+  self_invitation_not_allowed: "자기 자신이 만든 초대에는 참여할 수 없어요.",
+  pair_is_full: "이 커플에는 이미 두 명이 있어요.",
+  "missing-marker-fields": "마커 이름, 색, 아이콘을 확인해 주세요.",
+  "missing-photo-fields": "사진과 대상 기록을 확인해 주세요.",
+  "invalid-photo-type": "사진은 JPEG, PNG, WebP, AVIF만 가능해요.",
+  "photo-too-large": "사진은 10MB 이하로 올려 주세요.",
+  "missing-code": "초대 코드를 입력해 주세요.",
+  "missing-restaurant-fields": "음식점 정보를 빠짐없이 적어 주세요.",
+  "missing-review-fields": "평가 점수와 한줄평을 확인해 주세요.",
+  "invalid-score": "점수는 0에서 5 사이여야 해요.",
+  "experience-not-found": "해당 기록을 찾지 못했어요.",
+  "forbidden-review": "이 기록에 대한 평가 권한이 없어요.",
 };
 
 function messageFromParams(params: SearchParams | undefined) {
@@ -38,25 +39,25 @@ function messageFromParams(params: SearchParams | undefined) {
   const error = typeof params.error === "string" ? params.error : null;
   if (error) return errorMessages[error] ?? error;
   if (params.created === "1") {
-    return "첫 방문 기록이 추가됐다. 이제 각자 리뷰를 채워라.";
+    return "첫 방문 기록이 추가됐어요. 이제 각자 평가를 남기면 돼요.";
   }
   if (params.joined === "1") {
-    return "초대 코드로 pair에 합류했다.";
+    return "초대 코드로 커플에 합류했어요.";
   }
   if (params.marker_created === "1") {
-    return "마커를 추가했다.";
+    return "마커를 추가했어요.";
   }
   if (params.marker_applied === "1") {
-    return "마커를 붙였다.";
+    return "마커를 붙였어요.";
   }
   if (params.marker_removed === "1") {
-    return "마커를 제거했다.";
+    return "마커를 제거했어요.";
   }
   if (params.photo_uploaded === "1") {
-    return "사진을 올렸다.";
+    return "사진을 올렸어요.";
   }
   if (params.reviewed === "1") {
-    return "리뷰를 저장했다.";
+    return "평가를 저장했어요.";
   }
   return null;
 }
@@ -100,12 +101,32 @@ function StatCard({
   hint: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[var(--page-border)] bg-white/70 p-5">
-      <div className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--page-muted)]">
+    <div className="rounded-[1.5rem] border border-[var(--page-border)] bg-white/80 p-4">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--page-muted)]">
         {label}
       </div>
-      <div className="mt-3 text-3xl font-semibold tracking-[-0.05em]">{value}</div>
-      <div className="mt-2 text-sm text-[var(--page-muted)]">{hint}</div>
+      <div className="mt-2 text-2xl font-semibold tracking-[-0.05em]">{value}</div>
+      <div className="mt-2 text-sm leading-6 text-[var(--page-muted)]">{hint}</div>
+    </div>
+  );
+}
+
+function SectionTitle({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-sm text-[var(--page-muted)]">{subtitle}</p>
+      </div>
+      {action ? <div>{action}</div> : null}
     </div>
   );
 }
@@ -119,19 +140,19 @@ function PendingReviewCard({
     experience.subject?.metadata && typeof experience.subject.metadata === "object" && !Array.isArray(experience.subject.metadata)
       ? experience.subject.metadata
       : null;
-  const location = typeof metadata?.location === "string" ? metadata.location : "Location unavailable";
-  const category = typeof metadata?.category === "string" ? metadata.category : "Category n/a";
+  const location = typeof metadata?.location === "string" ? metadata.location : "위치 정보 없음";
+  const category = typeof metadata?.category === "string" ? metadata.category : "카테고리 없음";
 
   return (
-    <article className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
+    <article className="rounded-[1.5rem] border border-[var(--page-border)] bg-white/80 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--page-muted)]">
-            {experience.subject?.kind ?? "restaurant"}
+            {experience.subject?.kind ?? "음식점"}
           </div>
-          <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+          <h3 className="mt-2 text-xl font-semibold tracking-[-0.04em]">
             <Link href={`/evaluate?experience=${experience.id}`} className="hover:underline">
-              {experience.subject?.title ?? "Untitled restaurant"}
+              {experience.subject?.title ?? "이름 없는 음식점"}
             </Link>
           </h3>
           <p className="mt-2 text-sm text-[var(--page-muted)]">
@@ -140,12 +161,12 @@ function PendingReviewCard({
         </div>
         <div className="text-sm text-[var(--page-muted)]">
           <div>{formatDate(experience.happened_on)}</div>
-          <div className="mt-1">{experience.reviews.length} / 2 reviews</div>
+          <div className="mt-1">{experience.reviews.length} / 2개 평가</div>
         </div>
       </div>
 
       <div className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--page-border)] bg-[rgba(239,106,76,0.04)] px-4 py-3 text-sm">
-        <span className="text-[var(--page-muted)]">평가를 기다리는 기록</span>
+        <span className="text-[var(--page-muted)]">내 평가가 아직 없어요</span>
         <Link
           href={`/evaluate?experience=${experience.id}`}
           className="rounded-full bg-[var(--page-accent)] px-4 py-2 text-xs font-medium text-white"
@@ -163,32 +184,32 @@ export default async function AppHome({ searchParams }: AppPageProps) {
 
   if (!state.membership) {
     return (
-      <main className="min-h-screen px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
+      <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
         <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-4xl items-center">
           <div className="w-full rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
-              Pair setup
+              커플 설정
             </p>
             <h1
               className="mt-4 text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              {site.name} onboarding
+              {site.name}
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--page-muted)] sm:text-lg">
-              로그인은 끝났고, 이제 pair를 만든다. 여기서 생성한 초대 코드를
-              상대에게 보내면 된다.
+              로그인을 마쳤어요. 이제 커플을 만들거나 초대 코드로 합류하면 둘만의
+              기록 공간이 열려요.
             </p>
 
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
               <form
                 action="/api/pairs/create"
                 method="post"
-                className="rounded-2xl border border-[var(--page-border)] bg-white/70 p-5"
+                className="rounded-[1.5rem] border border-[var(--page-border)] bg-white/80 p-5"
               >
-                <p className="text-sm font-semibold">Create a pair</p>
+                <p className="text-sm font-semibold">커플 만들기</p>
                 <label className="mt-4 block text-sm text-[var(--page-muted)]">
-                  Pair label
+                  커플 이름
                   <input
                     name="label"
                     placeholder="예: 우리 커플"
@@ -199,18 +220,18 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                   type="submit"
                   className="mt-5 rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white"
                 >
-                  Pair 만들기
+                  커플 만들기
                 </button>
               </form>
 
               <form
                 action="/api/pairs/join"
                 method="post"
-                className="rounded-2xl border border-[var(--page-border)] bg-white/70 p-5"
+                className="rounded-[1.5rem] border border-[var(--page-border)] bg-white/80 p-5"
               >
-                <p className="text-sm font-semibold">Join with code</p>
+                <p className="text-sm font-semibold">초대 코드로 합류</p>
                 <label className="mt-4 block text-sm text-[var(--page-muted)]">
-                  Invitation code
+                  초대 코드
                   <input
                     name="code"
                     placeholder="AB12CD34"
@@ -221,7 +242,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                   type="submit"
                   className="mt-5 rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
                 >
-                  Join pair
+                  합류하기
                 </button>
               </form>
             </div>
@@ -231,13 +252,13 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                 href="/logout"
                 className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
               >
-                Sign out
+                로그아웃
               </Link>
               <Link
                 href="/"
                 className="rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
               >
-                Public landing
+                홈으로 돌아가기
               </Link>
             </div>
           </div>
@@ -247,7 +268,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
   }
 
   const { partner } = memberPair(state);
-  const pairLabel = state.pair?.label ?? "Unlabeled pair";
+  const pairLabel = state.pair?.label ?? "이름 없는 커플";
   const activeInvite = state.invitation?.code ?? null;
   const message = messageFromParams(params);
   const partnerUserId = partner?.user_id ?? null;
@@ -272,136 +293,98 @@ export default async function AppHome({ searchParams }: AppPageProps) {
   const markerCount = state.experiences.filter((experience) => experience.markers.length > 0).length;
 
   return (
-    <main className="min-h-screen px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
+    <main className="min-h-screen px-5 py-6 pb-28 text-[var(--page-text)] sm:px-8 sm:py-8">
       <section className="mx-auto w-full max-w-6xl">
-        <div className="grid gap-4">
-          <div className="w-full rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
-              Pair dashboard
-            </p>
-            <h1
-              className="mt-4 text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {pairLabel}
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--page-muted)] sm:text-lg">
-              최근 기록, 베스트 기록, 그리고 아직 남기지 않은 평가를 한 화면에서
-              다시 꺼내본다.
-            </p>
-
-            <div className="mt-6">
-              <WorkspaceNav active="dashboard" />
-            </div>
-
-            {message ? (
-              <div className="mt-6 rounded-2xl border border-[var(--page-border)] bg-white/70 px-4 py-3 text-sm text-[var(--page-muted)]">
-                {message}
-              </div>
-            ) : null}
-
-            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <StatCard
-                label="기록 수"
-                value={formatCompactCount(totalCount)}
-                hint="우리 pair에 저장된 전체 경험"
-              />
-              <StatCard
-                label="평가 대기"
-                value={formatCompactCount(pendingCount)}
-                hint="내가 아직 점수와 한줄평을 안 남긴 기록"
-              />
-              <StatCard
-                label="둘 다 평가"
-                value={formatCompactCount(bothReviewedCount)}
-                hint="두 사람의 취향이 모두 기록된 경험"
-              />
-              <StatCard
-                label="마커 기록"
-                value={formatCompactCount(markerCount)}
-                hint="셀카 같은 pair 전용 마커가 붙은 기록"
-              />
-            </div>
-
-            <div className="mt-8 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold">Pair members</p>
-                    <p className="text-sm text-[var(--page-muted)]">
-                      현재 pair에 속한 사람들
-                    </p>
-                  </div>
-                  <div className="text-xs font-medium uppercase tracking-[0.24em] text-[var(--page-muted)]">
-                    {state.members.length}/2
-                  </div>
-                </div>
-                <div className="mt-4 grid gap-3">
-                  {state.members.map((member) => (
-                    <div
-                      key={member.user_id}
-                      className="flex items-center justify-between rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3"
-                    >
-                      <div>
-                        <div className="text-sm font-medium">
-                          {member.profile?.display_name ?? "Unnamed user"}
-                        </div>
-                        <div className="text-xs text-[var(--page-muted)]">{member.role}</div>
-                      </div>
-                      <div className="text-xs text-[var(--page-muted)]">
-                        {member.user_id === state.user.id ? "You" : "Partner"}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[1.75rem] border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-5 text-white">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/55">
-                  Invitation state
-                </p>
-                <div className="mt-4 text-lg font-medium">
-                  {activeInvite ? "Pending invite active" : "No active invite"}
-                </div>
-                {activeInvite ? (
-                  <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/55">
-                      Invite code
-                    </div>
-                    <div className="mt-2 text-2xl font-semibold tracking-[0.18em]">
-                      {activeInvite}
-                    </div>
-                    <div className="mt-2 text-sm text-white/70">
-                      Share this once. It becomes invalid after use.
-                    </div>
-                  </div>
-                ) : (
-                  <p className="mt-4 text-sm text-white/70">
-                    초대가 끝났거나 아직 생성되지 않았다.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)]">
+          <div className="grid gap-4">
+            <header className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
+                대시보드
+              </p>
+              <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold">최근 기록</p>
-                  <p className="text-sm text-[var(--page-muted)]">
-                    막 저장했거나 다시 보고 싶은 기록
+                  <h1
+                    className="text-4xl font-semibold tracking-[-0.08em] sm:text-6xl"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {pairLabel}
+                  </h1>
+                  <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--page-muted)] sm:text-lg">
+                    최근 기록, 베스트 기록, 그리고 아직 남기지 않은 평가를 한 화면에서
+                    바로 볼 수 있어요.
                   </p>
                 </div>
+                <div className="self-start">
+                  <WorkspaceNav active="dashboard" />
+                </div>
+              </div>
+
+              {message ? (
+                <div className="mt-6 rounded-2xl border border-[var(--page-border)] bg-white/80 px-4 py-3 text-sm text-[var(--page-muted)]">
+                  {message}
+                </div>
+              ) : null}
+
+              <div className="mt-6 flex flex-wrap gap-3">
                 <Link
-                  href="/history?sort=recent"
-                  className="rounded-full border border-[var(--page-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--page-text)]"
+                  href="/evaluate"
+                  className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
                 >
-                  전체 최근 기록 보기
+                  평가 남기기
+                </Link>
+                <Link
+                  href="/history"
+                  className="rounded-full border border-[var(--page-border)] bg-white/80 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
+                >
+                  기록 보관함
                 </Link>
               </div>
+            </header>
+
+            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <SectionTitle
+                title="평가 대기"
+                subtitle="아직 내 평가가 없는 기록부터 먼저 처리해요."
+                action={
+                  <Link
+                    href="/evaluate"
+                    className="rounded-full border border-[var(--page-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--page-text)]"
+                  >
+                    평가 남기기
+                  </Link>
+                }
+              />
+
+              {pendingExperiences.length === 0 ? (
+                <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/60 p-6 text-sm text-[var(--page-muted)]">
+                  아직 남길 평가가 없어요. 새 기록이 생기면 여기에 다시 보여요.
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-4">
+                  {pendingExperiences.map((experience) => (
+                    <PendingReviewCard key={experience.id} experience={experience} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <SectionTitle
+                title="최근 기록"
+                subtitle="방금 저장했거나 다시 보고 싶은 기록이에요."
+                action={
+                  <Link
+                    href="/history?sort=recent"
+                    className="rounded-full border border-[var(--page-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--page-text)]"
+                  >
+                    전체 보기
+                  </Link>
+                }
+              />
 
               {recentExperiences.length === 0 ? (
-                <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/50 p-6 text-sm text-[var(--page-muted)]">
-                  아직 기록이 없다. 평가 남기기에서 첫 기록을 저장해라.
+                <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/60 p-6 text-sm text-[var(--page-muted)]">
+                  아직 기록이 없어요. 첫 기록을 남기면 여기서 바로 확인할 수 있어요.
                 </div>
               ) : (
                 <div className="mt-4 grid gap-4">
@@ -415,27 +398,25 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                   ))}
                 </div>
               )}
-            </div>
+            </section>
 
-            <div className="mt-4 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold">베스트 기록</p>
-                  <p className="text-sm text-[var(--page-muted)]">
-                    두 사람 모두 높게 준 기록만 모아서 본다
-                  </p>
-                </div>
-                <Link
-                  href="/history?sort=best"
-                  className="rounded-full border border-[var(--page-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--page-text)]"
-                >
-                  전체 베스트 보기
-                </Link>
-              </div>
+            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <SectionTitle
+                title="베스트 기록"
+                subtitle="두 사람 모두 높게 준 기록만 모아서 볼 수 있어요."
+                action={
+                  <Link
+                    href="/history?sort=best"
+                    className="rounded-full border border-[var(--page-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--page-text)]"
+                  >
+                    전체 보기
+                  </Link>
+                }
+              />
 
               {bestExperiences.length === 0 ? (
-                <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/50 p-6 text-sm text-[var(--page-muted)]">
-                  둘 다 리뷰한 기록이 아직 없다. `/evaluate`에서 리뷰를 채워라.
+                <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/60 p-6 text-sm text-[var(--page-muted)]">
+                  아직 두 사람 모두 평가한 기록이 없어요. 둘 다 평가를 남기면 여기에 보여요.
                 </div>
               ) : (
                 <div className="mt-4 grid gap-4">
@@ -449,52 +430,132 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                   ))}
                 </div>
               )}
-            </div>
+            </section>
+          </div>
 
-            <div className="mt-4 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold">평가 대기</p>
-                  <p className="text-sm text-[var(--page-muted)]">
-                    아직 내가 점수와 한줄평을 안 남긴 기록
-                  </p>
-                </div>
+          <aside className="grid gap-4">
+            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <p className="text-sm font-semibold">빠른 이동</p>
+              <div className="mt-4 grid gap-2">
                 <Link
                   href="/evaluate"
-                  className="rounded-full border border-[var(--page-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--page-text)]"
+                  className="rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 text-sm font-medium text-[var(--page-text)]"
                 >
-                  평가하러 가기
+                  새 기록 남기기
+                </Link>
+                <Link
+                  href="/history?sort=recent"
+                  className="rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 text-sm font-medium text-[var(--page-text)]"
+                >
+                  최근 기록 보기
+                </Link>
+                <Link
+                  href="/history?sort=best"
+                  className="rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 text-sm font-medium text-[var(--page-text)]"
+                >
+                  베스트 기록 보기
                 </Link>
               </div>
+            </section>
 
-              {pendingExperiences.length === 0 ? (
-                <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/50 p-6 text-sm text-[var(--page-muted)]">
-                  이미 모든 기록을 평가했다. 새 기록을 추가하면 다시 여기로 온다.
-                </div>
-              ) : (
-                <div className="mt-4 grid gap-4">
-                  {pendingExperiences.map((experience) => (
-                    <PendingReviewCard key={experience.id} experience={experience} />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/80 p-5">
+              <p className="text-sm font-semibold">기록 요약</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <StatCard
+                  label="기록 수"
+                  value={formatCompactCount(totalCount)}
+                  hint="커플에 저장된 전체 경험이에요."
+                />
+                <StatCard
+                  label="평가 대기"
+                  value={formatCompactCount(pendingCount)}
+                  hint="내가 아직 점수와 한줄평을 안 남긴 기록이에요."
+                />
+                <StatCard
+                  label="둘 다 평가"
+                  value={formatCompactCount(bothReviewedCount)}
+                  hint="두 사람의 취향이 모두 기록된 경험이에요."
+                />
+                <StatCard
+                  label="마커 기록"
+                  value={formatCompactCount(markerCount)}
+                  hint="셀카 같은 커플 마커가 붙은 기록이에요."
+                />
+              </div>
+            </section>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/logout"
-              className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
-            >
-              Sign out
-            </Link>
-            <Link
-              href="/"
-              className="rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
-            >
-              Public landing
-            </Link>
-          </div>
+            <section className="rounded-[1.75rem] border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-5 text-white">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold">커플 정보</p>
+                  <p className="mt-1 text-sm text-white/70">
+                    현재 커플에 속한 사람과 초대 상태를 확인해요.
+                  </p>
+                </div>
+                <div className="text-xs font-medium uppercase tracking-[0.24em] text-white/55">
+                  {state.members.length}/2
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                {state.members.map((member) => (
+                  <div
+                    key={member.user_id}
+                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                  >
+                    <div>
+                      <div className="text-sm font-medium">
+                        {member.profile?.display_name ?? "이름 없음"}
+                      </div>
+                      <div className="text-xs text-white/60">{member.role}</div>
+                    </div>
+                    <div className="text-xs text-white/60">
+                      {member.user_id === state.user.id ? "나" : "상대"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+                <div className="text-xs uppercase tracking-[0.24em] text-white/55">초대 상태</div>
+                <div className="mt-2 text-lg font-medium">
+                  {activeInvite ? "초대 코드가 활성화되어 있어요" : "활성 초대 코드가 없어요"}
+                </div>
+                {activeInvite ? (
+                  <>
+                    <div className="mt-3 text-xs uppercase tracking-[0.24em] text-white/55">
+                      초대 코드
+                    </div>
+                    <div className="mt-1 text-2xl font-semibold tracking-[0.18em]">
+                      {activeInvite}
+                    </div>
+                    <div className="mt-2 text-sm text-white/70">
+                      한 번만 공유하면 돼요. 사용되면 더 이상 쓸 수 없어요.
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-2 text-sm text-white/70">
+                    아직 초대 코드가 없거나, 이미 사용된 상태예요.
+                  </p>
+                )}
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href="/logout"
+            className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
+          >
+            로그아웃
+          </Link>
+          <Link
+            href="/"
+            className="rounded-full border border-[var(--page-border)] bg-white/80 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
+          >
+            홈으로 돌아가기
+          </Link>
         </div>
       </section>
     </main>

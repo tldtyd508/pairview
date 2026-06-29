@@ -17,9 +17,9 @@ test("restaurant entry uses first-visit-only behavior", () => {
 
   assert.match(appPage, /최근 기록/);
   assert.match(appPage, /베스트 기록/);
-  assert.match(evaluatePage, /첫 방문만 새 기록/);
+  assert.match(evaluatePage, /기록은 처음 방문 기준/);
   assert.match(evaluatePage, /마커 관리/);
   assert.match(experienceCards, /한줄평/);
-  assert.match(experienceCards, /아직 리뷰가 없다/);
+  assert.match(experienceCards, /아직 리뷰가 없어요/);
   assert.match(experienceRoute, /record_mode: "first_visit_only"/);
 });

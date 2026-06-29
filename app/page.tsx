@@ -1,31 +1,40 @@
-import { site } from "@/lib/site-data";
 import Link from "next/link";
+import { site } from "@/lib/site-data";
 
 const highlights = [
-  "두 사람의 점수는 따로 기록",
-  "한줄평과 히스토리 조회",
-  "커플 단위로 완전히 분리",
+  {
+    title: "각자 점수",
+    description: "둘의 취향을 따로 남겨서 나중에 다시 비교할 수 있어요.",
+  },
+  {
+    title: "한줄평",
+    description: "기억이 흐려지기 전에 짧게 적어 두면 보기 편해요.",
+  },
+  {
+    title: "기록 보관",
+    description: "다녀온 곳을 날짜와 함께 차곡차곡 모아 둘 수 있어요.",
+  },
 ];
 
-const snapshot = [
-  { label: "오늘의 상태", value: "Coming soon" },
-  { label: "기준", value: "각자 5점 만점" },
-  { label: "마커", value: "셀카각" },
+const guideSteps = [
+  "Google 계정으로 로그인해요.",
+  "음식점 기록을 남기고 각자 점수를 적어요.",
+  "좋았던 순간에는 마커와 사진을 남겨요.",
 ];
 
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden px-5 py-6 text-[var(--page-text)] sm:px-8 sm:py-8">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.6),transparent_38%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.7),transparent_36%)]" />
       <div className="pointer-events-none absolute left-[-8rem] top-[-6rem] h-72 w-72 rounded-full bg-[var(--page-accent-soft)] blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-8rem] right-[-6rem] h-80 w-80 rounded-full bg-[rgba(79,70,229,0.12)] blur-3xl" />
 
-      <section className="relative mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl items-center">
-        <div className="grid w-full gap-4 lg:grid-cols-[1.35fr_0.9fr]">
+      <section className="relative mx-auto w-full max-w-6xl">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
           <div className="rounded-[2rem] border border-[var(--page-border)] bg-[var(--page-surface)] p-6 shadow-[0_20px_80px_rgba(48,33,18,0.09)] backdrop-blur-md sm:p-8 lg:p-10">
-            <div className="inline-flex items-center gap-3 rounded-full border border-[var(--page-border)] bg-white/65 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
+            <div className="inline-flex items-center gap-3 rounded-full border border-[var(--page-border)] bg-white/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
               <span className="h-2 w-2 rounded-full bg-[var(--page-accent)]" />
-              Coming soon
+              커플 기록
             </div>
 
             <h1
@@ -40,9 +49,8 @@ export default function Home() {
             </p>
 
             <p className="mt-5 max-w-xl text-base leading-7 text-[var(--page-muted)] sm:text-lg">
-              함께한 경험을 두 사람의 시선으로 남기는 비공개 페어 로그.
-              먼저 음식점 기록부터 시작하고, 이후에는 애니나 다른 시리즈물
-              기록으로도 확장할 수 있게 설계합니다.
+              함께 다녀온 곳을 두 사람의 점수와 한줄평으로 남기는 비공개 기록장입니다.
+              모바일에서도 바로 열고, 나중에 기록 보관함에서 다시 찾을 수 있어요.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -52,58 +60,65 @@ export default function Home() {
               >
                 Google로 시작
               </Link>
+              <span className="rounded-full border border-[var(--page-border)] bg-white/70 px-4 py-2 text-sm text-[var(--page-text)]">
+                각자 점수
+              </span>
+              <span className="rounded-full border border-[var(--page-border)] bg-white/70 px-4 py-2 text-sm text-[var(--page-text)]">
+                한줄평과 기록 보관
+              </span>
+              <span className="rounded-full border border-[var(--page-border)] bg-white/70 px-4 py-2 text-sm text-[var(--page-text)]">
+                둘만 보는 기록
+              </span>
+            </div>
+
+            <div className="mt-8 grid gap-3 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
               {highlights.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-[var(--page-border)] bg-white/70 px-4 py-2 text-sm text-[var(--page-text)]"
+                <div
+                  key={item.title}
+                  className="flex items-start gap-3 rounded-2xl bg-[rgba(239,106,76,0.05)] px-4 py-3"
                 >
-                  {item}
-                </span>
+                  <div className="mt-1 h-2.5 w-2.5 rounded-full bg-[var(--page-accent)]" />
+                  <div>
+                    <div className="text-sm font-semibold">{item.title}</div>
+                    <div className="mt-1 text-sm leading-6 text-[var(--page-muted)]">
+                      {item.description}
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
 
           <aside className="grid gap-4">
-            <div className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5 shadow-[0_16px_50px_rgba(48,33,18,0.08)] backdrop-blur-md sm:p-6">
+            <div className="rounded-[1.75rem] border border-[var(--page-border)] bg-white/75 p-5 shadow-[0_16px_50px_rgba(48,33,18,0.08)] backdrop-blur-md sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[var(--page-muted)]">
-                Snapshot
+                사용 방식
               </p>
-              <div className="mt-5 grid gap-3">
-                {snapshot.map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between rounded-2xl bg-[rgba(239,106,76,0.05)] px-4 py-3"
+              <ol className="mt-5 grid gap-3">
+                {guideSteps.map((step, index) => (
+                  <li
+                    key={step}
+                    className="flex items-start gap-3 rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3"
                   >
-                    <span className="text-sm text-[var(--page-muted)]">
-                      {item.label}
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--page-accent-soft)] text-xs font-semibold text-[var(--page-text)]">
+                      {index + 1}
                     </span>
-                    <span className="text-sm font-medium text-[var(--page-text)]">
-                      {item.value}
-                    </span>
-                  </div>
+                    <span className="text-sm leading-6 text-[var(--page-text)]">{step}</span>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
 
             <div className="rounded-[1.75rem] border border-[var(--page-border)] bg-[rgba(31,26,22,0.96)] p-5 text-white shadow-[0_16px_50px_rgba(48,33,18,0.22)] sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/55">
-                Marker rule
+                도움말
               </p>
-              <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-                <div>
-                  <div className="text-lg font-medium tracking-[-0.03em]">
-                    셀카각
-                  </div>
-                  <div className="mt-1 text-sm text-white/68">
-                    둘 다 4.5점 이상이면 표시
-                  </div>
-                </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--page-accent)] text-sm font-semibold text-white">
-                  4.5+
-                </div>
-              </div>
+              <p className="mt-4 text-lg font-medium tracking-[-0.03em]">
+                특별히 좋았던 순간에는 마커를 남기고 사진을 붙여 둘 수 있어요.
+              </p>
               <p className="mt-4 text-sm leading-6 text-white/72">
-                마커는 먼저 수동으로 남기고, 나중에 조건형 추천으로 확장한다.
+                처음에는 음식점 기록만 쓰면 충분합니다. 익숙해지면 기록 보관함에서
+                지난 장소를 다시 꺼내 볼 수 있어요.
               </p>
             </div>
           </aside>

@@ -91,16 +91,16 @@ export default function LoginPanel({
     if (e2eMode || !error) return;
 
     const errors: Record<string, string> = {
-      callback: "로그인 처리를 끝내지 못했다. 다시 시도해 주세요.",
-      "missing-code": "로그인 코드가 없어 callback을 끝내지 못했다.",
+      callback: "로그인 처리를 끝내지 못했어요. 다시 시도해 주세요.",
+      "missing-code": "로그인 정보를 확인하지 못했어요. 다시 시도해 주세요.",
     };
 
-    setMessage(errors[error] ?? "로그인에 실패했다.");
+    setMessage(errors[error] ?? "로그인에 실패했어요. 다시 시도해 주세요.");
   }, [e2eMode, error]);
 
   async function handleCredential(response: CredentialResponse) {
     if (!response.credential || !nonceRef.current) {
-      setMessage("Google 인증 정보를 받지 못했다. 다시 시도해 주세요.");
+      setMessage("Google 인증 정보를 받지 못했어요. 다시 시도해 주세요.");
       return;
     }
 
@@ -123,7 +123,7 @@ export default function LoginPanel({
     const profileResponse = await fetch("/api/auth/profile", { method: "POST" });
     if (!profileResponse.ok) {
       await supabase.auth.signOut();
-      setMessage("프로필을 준비하지 못했다. 다시 시도해 주세요.");
+      setMessage("프로필을 준비하지 못했어요. 다시 시도해 주세요.");
       setLoading(false);
       return;
     }
@@ -138,7 +138,7 @@ export default function LoginPanel({
     if (!window.google || !googleButtonRef.current) return;
 
     if (!googleClientId) {
-      setMessage("Google 로그인 설정이 누락됐다.");
+      setMessage("Google 로그인 설정이 필요해요.");
       setRedirecting(false);
       return;
     }
@@ -185,7 +185,7 @@ export default function LoginPanel({
   if (redirecting) {
     return (
       <div className="rounded-2xl border border-[var(--page-border)] bg-white/70 px-4 py-4 text-sm text-[var(--page-muted)]">
-        이미 로그인된 상태를 확인하는 중이다.
+        이미 로그인된 상태를 확인하는 중이에요.
       </div>
     );
   }
@@ -197,10 +197,10 @@ export default function LoginPanel({
         strategy="afterInteractive"
         onReady={() => {
           void initializeGoogleSignIn().catch(() => {
-            setMessage("Google 로그인을 초기화하지 못했다.");
+            setMessage("Google 로그인을 초기화하지 못했어요.");
           });
         }}
-        onError={() => setMessage("Google 로그인 화면을 불러오지 못했다.")}
+        onError={() => setMessage("Google 로그인 화면을 불러오지 못했어요.")}
       />
       <div
         ref={googleButtonRef}
