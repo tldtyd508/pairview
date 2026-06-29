@@ -352,7 +352,7 @@ export default async function HistoryDetailPage({
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/app"
+              href="/history"
               className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
             >
               Back to history
