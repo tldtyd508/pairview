@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BrandLogo } from "@/app/_components/brand-logo";
 import { HistoryExperienceCard } from "@/app/_components/experience-cards";
 import { WorkspaceNav } from "@/app/_components/workspace-nav";
 import { getAppState, type AppState } from "@/lib/app-state";
 import { filterAndSortExperiences, parseHistoryFilters } from "@/lib/history";
-import { site } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
 
@@ -193,7 +193,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
             <h1
               className="mt-4 text-4xl font-semibold sm:text-6xl"
             >
-              {site.name}
+              <BrandLogo />
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--page-muted)] sm:text-lg">
               로그인을 마쳤어요. 이제 커플을 만들거나 초대 코드로 합류하면 둘만의

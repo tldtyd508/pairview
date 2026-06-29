@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/app/_components/brand-logo";
 import { site } from "@/lib/site-data";
 
 const highlights = [
@@ -36,7 +37,7 @@ export default function Home() {
             <h1
               className="mt-6 max-w-xl text-4xl font-semibold sm:text-7xl lg:text-8xl"
             >
-              Pairview
+              <BrandLogo />
             </h1>
 
             <p className="mt-5 max-w-2xl text-xl leading-tight text-[var(--page-text)] sm:text-3xl lg:text-[2.5rem]">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/app/_components/brand-logo";
 import LoginPanel from "./login-panel";
 
 type LoginPageProps = {
@@ -23,7 +24,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <h1
             className="mt-4 text-4xl font-semibold sm:text-6xl"
           >
-            Pairview
+            <BrandLogo />
           </h1>
           <p className="mt-4 max-w-xl text-base leading-7 text-[var(--page-muted)] sm:text-lg">
             Google 계정으로 로그인하면 Pairview 공간으로 이동해요. 커플이 없으면
