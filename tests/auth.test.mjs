@@ -19,6 +19,8 @@ test("auth route files are wired", () => {
   const createRoute = read("app/api/pairs/create/route.ts");
   const joinRoute = read("app/api/pairs/join/route.ts");
   const appPage = read("app/app/page.tsx");
+  const evaluatePage = read("app/evaluate/page.tsx");
+  const workspaceNav = read("app/_components/workspace-nav.tsx");
   const migration = read("supabase/migrations/0002_pair_onboarding.sql");
   const experienceRoute = read("app/api/experiences/route.ts");
   const reviewRoute = read("app/api/reviews/route.ts");
@@ -34,6 +36,8 @@ test("auth route files are wired", () => {
   assert.match(profileRoute, /syncUserProfile/);
   assert.match(logoutRoute, /signOut/);
   assert.match(middleware, /matcher:\s*\[\s*"\/app\/:path\*"/);
+  assert.match(middleware, /"\/evaluate\/:path\*"/);
+  assert.match(middleware, /"\/history\/:path\*"/);
   assert.match(middleware, /\/login/);
   assert.match(createRoute, /create_pair_with_invitation/);
   assert.match(joinRoute, /join_pair_via_invitation/);
@@ -46,9 +50,14 @@ test("auth route files are wired", () => {
   assert.doesNotMatch(joinRoute, /auth\.getUser/);
   assert.match(postRedirect, /status:\s*303/);
   assert.doesNotMatch(middleware, /auth\.getUser/);
-  assert.match(appPage, /새 음식점 기록/);
-  assert.match(appPage, /첫 방문만 새 기록/);
-  assert.match(appPage, /리뷰를 저장했다/);
+  assert.match(appPage, /최근 기록/);
+  assert.match(appPage, /베스트 기록/);
+  assert.match(workspaceNav, /대시보드/);
+  assert.match(workspaceNav, /평가 남기기/);
+  assert.match(workspaceNav, /기록 보관함/);
+  assert.match(evaluatePage, /새 음식점 기록/);
+  assert.match(evaluatePage, /첫 방문만 새 기록/);
+  assert.match(evaluatePage, /리뷰를 저장했다/);
   assert.match(migration, /shares_pair_with_user/);
   assert.match(migration, /users can read pairmate profiles/);
   assert.match(migration, /pair_is_full/);

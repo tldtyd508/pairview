@@ -97,6 +97,54 @@ const experiences = [
     ],
     markers: [],
   },
+  {
+    id: "3",
+    happened_on: "2026-01-12",
+    created_at: "2026-01-12T10:00:00.000Z",
+    updated_at: "2026-01-12T10:00:00.000Z",
+    pair_id: "pair",
+    subject_id: "subject-3",
+    notes: "dessert",
+    created_by_user_id: "user-a",
+    subject: {
+      id: "subject-3",
+      pair_id: "pair",
+      kind: "restaurant",
+      title: "Sweet Corner",
+      description: "Hongdae",
+      metadata: {
+        location: "Hongdae",
+        category: "Dessert",
+        ordered_menus: "cake",
+      },
+      created_by_user_id: "user-a",
+      created_at: "2026-01-12T10:00:00.000Z",
+      updated_at: "2026-01-12T10:00:00.000Z",
+    },
+    reviews: [
+      {
+        id: "r4",
+        pair_id: "pair",
+        experience_id: "3",
+        user_id: "user-a",
+        score: 4.0,
+        body: "good",
+        created_at: "2026-01-12T11:00:00.000Z",
+        updated_at: "2026-01-12T11:00:00.000Z",
+      },
+      {
+        id: "r5",
+        pair_id: "pair",
+        experience_id: "3",
+        user_id: "user-b",
+        score: 4.0,
+        body: "also good",
+        created_at: "2026-01-12T11:10:00.000Z",
+        updated_at: "2026-01-12T11:10:00.000Z",
+      },
+    ],
+    markers: [],
+  },
 ];
 
 test("parseHistoryFilters normalizes query parameters", () => {
@@ -137,23 +185,45 @@ test("filterAndSortExperiences handles review state and score sort", () => {
   });
 
   const result = filterAndSortExperiences(experiences, filters, "user-a", "user-b");
-  assert.equal(result.length, 1);
+  assert.equal(result.length, 2);
   assert.equal(result[0].id, "2");
+  assert.equal(result[1].id, "3");
+});
+
+test("filterAndSortExperiences handles best sort", () => {
+  const filters = parseHistoryFilters({
+    sort: "best",
+  });
+
+  const result = filterAndSortExperiences(experiences, filters, "user-a", "user-b");
+  assert.equal(result.length, 2);
+  assert.equal(result[0].id, "3");
+  assert.equal(result[1].id, "2");
 });
 
 test("history UI and detail route are wired", () => {
   const appPage = read("app/app/page.tsx");
+  const evaluatePage = read("app/evaluate/page.tsx");
+  const workspaceNav = read("app/_components/workspace-nav.tsx");
   const historyPage = read("app/history/page.tsx");
   const detailPage = read("app/history/[experienceId]/page.tsx");
   const markerRoute = read("app/api/markers/route.ts");
   const experienceMarkerRoute = read("app/api/experience-markers/route.ts");
   const photoRoute = read("app/api/photos/route.ts");
 
-  assert.match(appPage, /평가 남기기/);
-  assert.match(appPage, /마커 관리/);
+  assert.match(appPage, /최근 기록/);
+  assert.match(appPage, /베스트 기록/);
+  assert.match(appPage, /평가 대기/);
+  assert.match(workspaceNav, /대시보드/);
+  assert.match(workspaceNav, /평가 남기기/);
+  assert.match(workspaceNav, /기록 보관함/);
+  assert.match(evaluatePage, /평가 남기기/);
+  assert.match(evaluatePage, /마커 관리/);
+  assert.match(evaluatePage, /기록 저장/);
   assert.match(historyPage, /기록 보관함/);
   assert.match(historyPage, /필터 적용/);
   assert.match(historyPage, /히스토리 검색/);
+  assert.match(historyPage, /베스트/);
   assert.match(detailPage, /Back to history/);
   assert.match(detailPage, /History detail/);
   assert.match(detailPage, /marker 없음/);

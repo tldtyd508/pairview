@@ -36,15 +36,18 @@ test("pairview happy path", async ({ browser }) => {
 
   await ownerPage.getByLabel("Pair label").fill("우리 커플");
   await ownerPage.getByRole("button", { name: "Pair 만들기" }).click();
-  await expect(ownerPage.getByText("Invite code")).toBeVisible();
+  await expect(ownerPage.getByText("최근 기록", { exact: true })).toBeVisible();
+  await expect(ownerPage.getByText("베스트 기록", { exact: true })).toBeVisible();
   await expect(ownerPage.getByText("PAIRVIEW", { exact: true })).toBeVisible();
+
+  await ownerPage.goto("/evaluate");
+  await expect(ownerPage.getByRole("heading", { name: "평가 남기기" })).toBeVisible();
 
   await ownerPage.getByRole("textbox", { name: "이름", exact: true }).fill("셀카");
   await ownerPage.getByLabel("아이콘").fill("📸");
   await ownerPage.getByLabel("색상").fill("#ef6a4c");
   await ownerPage.getByRole("button", { name: "마커 추가" }).click();
-  await ownerPage.reload();
-  await expect(ownerPage.getByText("📸 셀카")).toBeVisible();
+  await expect(ownerPage.getByText("마커를 추가했다.")).toBeVisible();
 
   await ownerPage.getByLabel("음식점 이름").fill("Mellow Table");
   await ownerPage.getByLabel("위치").fill("Seoul Forest");
@@ -54,6 +57,10 @@ test("pairview happy path", async ({ browser }) => {
   await ownerPage.getByLabel("메모").fill("데이트 코스");
   await ownerPage.getByRole("button", { name: "기록 저장" }).click();
   await expect(ownerPage.getByText("첫 방문 기록이 추가됐다")).toBeVisible();
+
+  const createdExperienceUrl = new URL(ownerPage.url());
+  const experienceId = createdExperienceUrl.searchParams.get("experience");
+  expect(experienceId).not.toBeNull();
 
   await ownerPage.locator('select[name="score"]').selectOption("4.5");
   await ownerPage.getByLabel("한줄평").fill("분위기가 좋았다.");
@@ -68,17 +75,20 @@ test("pairview happy path", async ({ browser }) => {
   await expect(partnerPage.getByText("Join with code")).toBeVisible();
   await partnerPage.getByLabel("Invitation code").fill("PAIRVIEW");
   await partnerPage.getByRole("button", { name: "Join pair" }).click();
-  await expect(partnerPage.getByText("초대 코드로 pair에 합류했다.")).toBeVisible();
+  await expect(partnerPage.getByText("최근 기록", { exact: true })).toBeVisible();
 
+  await partnerPage.goto(`/evaluate?experience=${experienceId}`);
   await partnerPage.locator('select[name="score"]').selectOption("5.0");
   await partnerPage.getByLabel("한줄평").fill("재방문할 만하다.");
   await partnerPage.getByRole("button", { name: "저장", exact: true }).click();
   await expect(partnerPage.getByText("리뷰를 저장했다.")).toBeVisible();
 
-  await ownerPage.reload();
-  await expect(ownerPage.getByRole("link", { name: "Mellow Table" })).toBeVisible();
+  await ownerPage.goto("/app");
+  await expect(ownerPage.getByText("최근 기록", { exact: true })).toBeVisible();
+  await expect(ownerPage.getByText("베스트 기록", { exact: true })).toBeVisible();
+  await expect(ownerPage.getByRole("link", { name: "Mellow Table" }).first()).toBeVisible();
 
-  await ownerPage.getByRole("link", { name: "Mellow Table" }).click();
+  await ownerPage.getByRole("link", { name: "Mellow Table" }).first().click();
   await expect(ownerPage).toHaveURL(/\/history\//);
   await expect(ownerPage.getByText("History detail")).toBeVisible();
 
@@ -95,6 +105,10 @@ test("pairview happy path", async ({ browser }) => {
   await expect(ownerPage.getByText("사진을 올렸다.")).toBeVisible();
   await expect(ownerPage.getByRole("img", { name: "셀카" })).toBeVisible();
   await expect(ownerPage.getByRole("button", { name: "📸 셀카 ×" })).toBeVisible();
+
+  await ownerPage.goto("/history?sort=best");
+  await expect(ownerPage).toHaveURL(/sort=best/);
+  await expect(ownerPage.getByRole("link", { name: "Mellow Table" }).first()).toBeVisible();
 
   await partner.close();
   await owner.close();

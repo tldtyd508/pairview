@@ -1,6 +1,6 @@
 import type { ExperienceCard } from "@/lib/app-state";
 
-export type HistorySort = "recent" | "oldest" | "your_score" | "partner_score";
+export type HistorySort = "recent" | "oldest" | "your_score" | "partner_score" | "best";
 
 export type ReviewStateFilter = "all" | "none" | "one" | "both";
 
@@ -40,7 +40,8 @@ export function parseHistoryFilters(
     sort:
       sortValue === "oldest" ||
       sortValue === "your_score" ||
-      sortValue === "partner_score"
+      sortValue === "partner_score" ||
+      sortValue === "best"
         ? sortValue
         : "recent",
     reviewState:
@@ -106,6 +107,17 @@ function reviewScoreOf(experience: ExperienceCard, userId: string) {
   return experience.reviews.find((review) => review.user_id === userId)?.score ?? null;
 }
 
+function combinedScoreOf(experience: ExperienceCard, currentUserId: string, partnerUserId: string) {
+  const myScore = reviewScoreOf(experience, currentUserId);
+  const partnerScore = reviewScoreOf(experience, partnerUserId);
+
+  if (myScore === null || partnerScore === null) {
+    return null;
+  }
+
+  return myScore + partnerScore;
+}
+
 export function filterAndSortExperiences(
   experiences: ExperienceCard[],
   filters: HistoryFilters,
@@ -133,6 +145,8 @@ export function filterAndSortExperiences(
     const partnerScore = partnerUserId
       ? reviewScoreOf(experience, partnerUserId)
       : null;
+    const bestScore =
+      partnerUserId !== null ? combinedScoreOf(experience, currentUserId, partnerUserId) : null;
     const reviewCount = experience.reviews.length;
 
     if (!isOnOrAfter(experience.happened_on, filters.from)) return false;
@@ -158,6 +172,7 @@ export function filterAndSortExperiences(
 
     if (filters.sort === "your_score" && myScore === null) return false;
     if (filters.sort === "partner_score" && partnerScore === null) return false;
+    if (filters.sort === "best" && bestScore === null) return false;
 
     return true;
   });
@@ -181,6 +196,19 @@ export function filterAndSortExperiences(
 
     if (filters.sort === "partner_score") {
       return rightPartnerScore - leftPartnerScore ||
+        right.happened_on.localeCompare(left.happened_on) ||
+        right.created_at.localeCompare(left.created_at);
+    }
+
+    if (filters.sort === "best") {
+      const leftBestScore = partnerUserId
+        ? combinedScoreOf(left, currentUserId, partnerUserId) ?? -1
+        : -1;
+      const rightBestScore = partnerUserId
+        ? combinedScoreOf(right, currentUserId, partnerUserId) ?? -1
+        : -1;
+
+      return rightBestScore - leftBestScore ||
         right.happened_on.localeCompare(left.happened_on) ||
         right.created_at.localeCompare(left.created_at);
     }

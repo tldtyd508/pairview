@@ -20,13 +20,13 @@ export async function POST(request: NextRequest) {
   const body = normalizeText(formData.get("body"));
 
   if (!experienceId || !scoreValue) {
-    return redirectAfterPost(new URL("/app?error=missing-review-fields", request.url));
+    return redirectAfterPost(new URL("/evaluate?error=missing-review-fields", request.url));
   }
 
   const score = Number(scoreValue);
 
   if (!Number.isFinite(score) || score < 0 || score > 5) {
-    return redirectAfterPost(new URL("/app?error=invalid-score", request.url));
+    return redirectAfterPost(new URL("/evaluate?error=invalid-score", request.url));
   }
 
   if (isE2EMode()) {
@@ -45,12 +45,12 @@ export async function POST(request: NextRequest) {
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
       return redirectAfterPost(
-        new URL(`/app?error=${encodeURIComponent(errorMessage)}`, request.url),
+        new URL(`/evaluate?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
     return redirectAfterPost(
-      new URL(`/app?reviewed=1&experience=${result.experience_id}`, request.url),
+      new URL(`/evaluate?reviewed=1&experience=${result.experience_id}`, request.url),
     );
   }
 
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (experienceError || !experience) {
-    return redirectAfterPost(new URL("/app?error=experience-not-found", request.url));
+    return redirectAfterPost(new URL("/evaluate?error=experience-not-found", request.url));
   }
 
   const { data: membership } = await supabase
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!membership) {
-    return redirectAfterPost(new URL("/app?error=forbidden-review", request.url));
+    return redirectAfterPost(new URL("/evaluate?error=forbidden-review", request.url));
   }
 
   const { error } = await supabase.from("reviews").upsert(
@@ -95,11 +95,11 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     return redirectAfterPost(
-      new URL(`/app?error=${encodeURIComponent(error.message)}`, request.url),
+      new URL(`/evaluate?error=${encodeURIComponent(error.message)}`, request.url),
     );
   }
 
   return redirectAfterPost(
-    new URL(`/app?reviewed=1&experience=${experience.id}`, request.url),
+    new URL(`/evaluate?reviewed=1&experience=${experience.id}`, request.url),
   );
 }

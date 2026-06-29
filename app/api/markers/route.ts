@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   const description = normalizeText(formData.get("description"));
 
   if (!name || !icon || !color) {
-    return redirectAfterPost(new URL("/app?error=missing-marker-fields", request.url));
+    return redirectAfterPost(new URL("/evaluate?error=missing-marker-fields", request.url));
   }
 
   if (isE2EMode()) {
@@ -41,11 +41,11 @@ export async function POST(request: NextRequest) {
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
       return redirectAfterPost(
-        new URL(`/app?error=${encodeURIComponent(errorMessage)}`, request.url),
+        new URL(`/evaluate?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
-    return redirectAfterPost(new URL("/app?marker_created=1", request.url));
+    return redirectAfterPost(new URL("/evaluate?marker_created=1", request.url));
   }
 
   const supabase = await createSupabaseServerClient();
@@ -76,9 +76,9 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     return redirectAfterPost(
-      new URL(`/app?error=${encodeURIComponent(error.message)}`, request.url),
+      new URL(`/evaluate?error=${encodeURIComponent(error.message)}`, request.url),
     );
   }
 
-  return redirectAfterPost(new URL("/app?marker_created=1", request.url));
+  return redirectAfterPost(new URL("/evaluate?marker_created=1", request.url));
 }

@@ -13,6 +13,7 @@
 - **Future users:** Other invited pairs.
 - **Core value:** Preserve two different tastes without collapsing them into an average score.
 - **Privacy:** Each pair's records are isolated from every other pair.
+- **Dashboard direction:** The app home should act as an entry point for revisiting recent records, best records, and pending reviews rather than only showing aggregate counts.
 
 ## Confirmed MVP decisions
 
@@ -22,6 +23,7 @@
 - No average score is shown.
 - Restaurant records include at least name, location, visit date, category, and ordered menu.
 - History supports search, sorting, and filtering.
+- The app should separate dashboard, evaluation, history, and detail responsibilities.
 - The MVP is private; there is no public feed or public sharing.
 - The visual style is minimal and mobile-first.
 

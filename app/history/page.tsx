@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { HistoryExperienceCard } from "@/app/_components/experience-cards";
+import { WorkspaceNav } from "@/app/_components/workspace-nav";
 import { getAppState, type AppState } from "@/lib/app-state";
 import {
   filterAndSortExperiences,
@@ -21,6 +22,7 @@ const sortOptions = [
   ["oldest", "오래된 방문"],
   ["your_score", "내 점수"],
   ["partner_score", "상대 점수"],
+  ["best", "베스트"],
 ] as const;
 
 const reviewStateOptions = [
@@ -89,7 +91,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
   const state = await getAppState();
 
   if (!state.membership) {
-    redirect("/login");
+    redirect("/app");
   }
 
   const { partner } = memberPair(state);
@@ -130,20 +132,7 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
                 검색과 필터는 여기에서만 관리한다. 평가 입력은 평가 화면에서 처리한다.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/app"
-                className="rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
-              >
-                평가 남기기
-              </Link>
-              <Link
-                href="/history"
-                className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white"
-              >
-                기록 보관함
-              </Link>
-            </div>
+            <WorkspaceNav active="history" />
           </div>
 
           <div className="mt-8 rounded-[1.75rem] border border-[var(--page-border)] bg-white/70 p-5">
@@ -266,6 +255,11 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
             {filteredExperiences.length === 0 ? (
               <div className="mt-4 rounded-2xl border border-dashed border-[var(--page-border)] bg-white/50 p-6 text-sm text-[var(--page-muted)]">
                 {historyEmptyMessage(filters)}
+                <div className="mt-3">
+                  <Link href="/evaluate" className="font-medium text-[var(--page-text)] underline">
+                    평가하러 가기
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="mt-4 grid gap-4">
@@ -286,7 +280,13 @@ export default async function HistoryPage({ searchParams }: HistoryPageProps) {
               href="/app"
               className="rounded-full bg-[var(--page-accent)] px-5 py-3 text-sm font-medium text-white transition-transform hover:-translate-y-0.5"
             >
-              평가 화면으로
+              대시보드로
+            </Link>
+            <Link
+              href="/evaluate"
+              className="rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
+            >
+              평가 남기기
             </Link>
             <Link
               href="/logout"

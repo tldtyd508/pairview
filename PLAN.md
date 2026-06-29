@@ -163,3 +163,197 @@ Confirm whether configurable recommendation conditions belong in the MVP. Manual
 - Recommendation feeds or partner taste comparison analytics.
 - Native mobile applications.
 - Importing restaurant data from external APIs.
+
+## Post-MVP dashboard tickets
+
+These tickets assume MVP tasks 1–8 are complete and the current app already has:
+
+- `/app` as the authenticated evaluation workspace.
+- `/history` as the full archive with filters.
+- `/history/[experienceId]` as the detail page.
+- Shared record cards in `app/_components/experience-cards.tsx`.
+
+Work one ticket at a time. Keep each ticket independently reviewable.
+
+## 9. Add best-record sorting to history
+
+### Goal
+
+Let users view the archive by "best" records without showing an average score as a product concept.
+
+### Scope
+
+- Add `best` to the history sort options.
+- Sort best records by the sum of the two partners' scores in descending order.
+- Include only records with both partner reviews when sorting by `best`.
+- Break ties by most recent visit date.
+- Keep the visible card display as separate scores, e.g. `You 4.5` and `Partner 5`, not an average.
+- Support `/history?sort=best` directly through URL state.
+- Update `lib/history.ts` and `lib/history.js` together.
+
+### Acceptance criteria
+
+- `/history?sort=best` shows only records reviewed by both members.
+- Best records are ordered by combined score, then recent visit.
+- Other sort modes keep their current behavior.
+- Automated history tests cover the `best` filter and tie-break behavior.
+
+### Validation
+
+```bash
+npm test
+npm run typecheck
+```
+
+## 10. Move the evaluation workspace from `/app` to `/evaluate`
+
+### Goal
+
+Free `/app` to become the dashboard while preserving the current record-entry and review workflow.
+
+### Scope
+
+- Create `/evaluate` and move the current authenticated evaluation UI there.
+- Keep pair onboarding available for users without a pair. Either:
+  - keep onboarding in `/app` until dashboard can handle it, or
+  - extract onboarding into a reusable component and render it from both routes as needed.
+- Update post-submit redirects that should return to the evaluation workflow:
+  - restaurant creation
+  - review save
+  - marker creation if it remains on the evaluation page
+- Leave `/history` and `/history/[experienceId]` intact.
+- Add a temporary redirect or link path from `/app` only if needed during this transition.
+
+### Acceptance criteria
+
+- Signed-in users with a pair can open `/evaluate` and perform the current record/review workflow.
+- Restaurant creation redirects back to `/evaluate?created=1&experience=...`.
+- Review save redirects back to `/evaluate?reviewed=1&experience=...`.
+- Existing E2E happy path passes after path updates.
+- No route exposes pair data to unauthenticated users.
+
+### Validation
+
+```bash
+npm test
+npm run typecheck
+npm run lint
+npm run test:e2e
+```
+
+## 11. Build `/app` as the dashboard
+
+### Goal
+
+Make `/app` the authenticated home that helps the pair revisit recent records, best records, and pending reviews.
+
+### Scope
+
+- Replace the evaluation-heavy `/app` content with a dashboard.
+- Keep onboarding behavior for signed-in users without a pair.
+- Add a shared authenticated navigation component with:
+  - `대시보드` → `/app`
+  - `평가 남기기` → `/evaluate`
+  - `기록 보관함` → `/history`
+- Add summary cards:
+  - total record count
+  - records pending my review
+  - records reviewed by both members
+  - records with at least one marker
+- Add a "최근 기록" section:
+  - show the 3–5 most recent records
+  - link to `/history?sort=recent`
+  - each item links to its detail page
+- Add a "베스트 기록" section:
+  - show the top 3–5 records using the same best-ranking logic from ticket 9
+  - link to `/history?sort=best`
+  - show separate partner scores, not an average
+- Add a "평가 대기" section:
+  - show up to 3 records missing the current user's review
+  - link to `/evaluate`
+- Keep the layout mobile-first and minimal.
+
+### Acceptance criteria
+
+- `/app` is useful without scrolling through a large form first.
+- Recent records, best records, and pending reviews are all accessible from the dashboard.
+- Dashboard record links open `/history/[experienceId]`.
+- Empty states explain what to do next:
+  - no records yet → go to `/evaluate`
+  - no best records yet → both members need to review records
+  - no pending reviews → no action needed
+- No average score is shown.
+
+### Validation
+
+```bash
+npm test
+npm run typecheck
+npm run lint
+npm run build
+```
+
+## 12. Update E2E coverage for dashboard navigation
+
+### Goal
+
+Protect the new route split and dashboard entry points from regression.
+
+### Scope
+
+- Update `tests/e2e/pairview-happy-path.spec.ts` to use:
+  - `/app` for dashboard
+  - `/evaluate` for creating and reviewing records
+  - `/history` for archive browsing
+- Add assertions that dashboard shows:
+  - a recent record after one is created
+  - a pending review for the partner before they review
+  - a best record after both reviews exist
+- Keep the fixture-only E2E mode; do not depend on real OAuth or production Supabase.
+
+### Acceptance criteria
+
+- The happy path still covers sign-in boundary, pair creation, pair join, restaurant creation, two reviews, marker, photo, history detail.
+- The test explicitly proves `/app` is dashboard, not the evaluation form.
+- E2E remains deterministic and isolated.
+
+### Validation
+
+```bash
+npm run test:e2e
+npm run build
+```
+
+## 13. Polish dashboard copy and visual hierarchy
+
+### Goal
+
+Make the dashboard feel like PairView's home rather than an admin stats screen.
+
+### Scope
+
+- Prefer record-oriented labels over analytics-heavy labels.
+- Suggested section names:
+  - `최근 기록`
+  - `베스트 기록`
+  - `평가 대기`
+  - `빠른 이동`
+- Use count cards as supporting context, not the main content.
+- Ensure CTA labels are action-oriented:
+  - `새 기록 남기기`
+  - `평가하러 가기`
+  - `전체 기록 보기`
+- Keep Korean user-facing copy consistent with the existing direct tone.
+
+### Acceptance criteria
+
+- The page's primary visual weight is on records, not numbers.
+- The dashboard works on mobile without dense tables.
+- All new copy is in Korean unless it is a small technical label already established elsewhere.
+
+### Validation
+
+```bash
+npm run lint
+npm run build
+```

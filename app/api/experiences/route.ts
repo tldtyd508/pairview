@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (!restaurantName || !location || !category || !orderedMenus || !visitDate) {
       return redirectAfterPost(
-        new URL("/app?error=missing-restaurant-fields", request.url),
+        new URL("/evaluate?error=missing-restaurant-fields", request.url),
       );
     }
 
@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
     if ("error" in result) {
       const errorMessage = result.error ?? "unknown_error";
       return redirectAfterPost(
-        new URL(`/app?error=${encodeURIComponent(errorMessage)}`, request.url),
+        new URL(`/evaluate?error=${encodeURIComponent(errorMessage)}`, request.url),
       );
     }
 
     return redirectAfterPost(
-      new URL(`/app?experience=${result.experience_id}&created=1`, request.url),
+      new URL(`/evaluate?experience=${result.experience_id}&created=1`, request.url),
     );
   }
 
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
   if (!restaurantName || !location || !category || !orderedMenus || !visitDate) {
     return redirectAfterPost(
-      new URL("/app?error=missing-restaurant-fields", request.url),
+      new URL("/evaluate?error=missing-restaurant-fields", request.url),
     );
   }
 
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
   if (subjectError) {
     return redirectAfterPost(
-      new URL(`/app?error=${encodeURIComponent(subjectError.message)}`, request.url),
+      new URL(`/evaluate?error=${encodeURIComponent(subjectError.message)}`, request.url),
     );
   }
 
@@ -124,11 +124,11 @@ export async function POST(request: NextRequest) {
 
   if (experienceError) {
     return redirectAfterPost(
-      new URL(`/app?error=${encodeURIComponent(experienceError.message)}`, request.url),
+      new URL(`/evaluate?error=${encodeURIComponent(experienceError.message)}`, request.url),
     );
   }
 
   return redirectAfterPost(
-    new URL(`/app?experience=${experience.id}&created=1`, request.url),
+    new URL(`/evaluate?experience=${experience.id}&created=1`, request.url),
   );
 }

@@ -11,11 +11,14 @@ function read(relativePath) {
 
 test("restaurant entry uses first-visit-only behavior", () => {
   const appPage = read("app/app/page.tsx");
+  const evaluatePage = read("app/evaluate/page.tsx");
   const experienceCards = read("app/_components/experience-cards.tsx");
   const experienceRoute = read("app/api/experiences/route.ts");
 
-  assert.match(appPage, /첫 방문만 새 기록/);
-  assert.match(appPage, /평가 남기기/);
+  assert.match(appPage, /최근 기록/);
+  assert.match(appPage, /베스트 기록/);
+  assert.match(evaluatePage, /첫 방문만 새 기록/);
+  assert.match(evaluatePage, /마커 관리/);
   assert.match(experienceCards, /한줄평/);
   assert.match(experienceCards, /아직 리뷰가 없다/);
   assert.match(experienceRoute, /record_mode: "first_visit_only"/);

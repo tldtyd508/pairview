@@ -8,12 +8,15 @@ import type { Database } from "@/lib/supabase/types";
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isLoginPage = pathname === "/login";
-  const isProtectedApp = pathname.startsWith("/app");
+  const isProtectedWorkspace =
+    pathname.startsWith("/app") ||
+    pathname.startsWith("/evaluate") ||
+    pathname.startsWith("/history");
 
   if (isE2EMode()) {
     const authUserId = getFixtureAuthUserId(request.cookies);
 
-    if (!authUserId && isProtectedApp) {
+    if (!authUserId && isProtectedWorkspace) {
       const redirectUrl = new URL("/login", request.url);
       redirectUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(redirectUrl);
@@ -64,7 +67,7 @@ export async function middleware(request: NextRequest) {
   );
 
   const userId = await getAuthenticatedUserId(supabase);
-  if (!userId && isProtectedApp) {
+  if (!userId && isProtectedWorkspace) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(redirectUrl);
@@ -78,5 +81,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/login"],
+  matcher: ["/app/:path*", "/evaluate/:path*", "/history/:path*", "/login"],
 };
