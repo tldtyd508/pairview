@@ -595,3 +595,157 @@ Use browser checks at mobile width for:
 /history
 /history?sort=best
 ```
+
+## Post-MVP invitation sharing tickets
+
+These tickets improve the pair invitation UX from manual code entry to shareable links. Keep the existing single-use invitation semantics and pair-size protections. Work one ticket at a time.
+
+## 19. Add a join-by-link page
+
+### Goal
+
+Let an invited partner open a link such as `/join?code=PAIRVIEW` and complete the join flow without manually finding the code entry form.
+
+### Scope
+
+- Add `app/join/page.tsx`.
+- Read `code` from the query string.
+- If the user is not authenticated, send them to `/login?next=/join?code=...`.
+- If authenticated and `code` is present, show a focused confirmation screen with:
+  - the invitation code,
+  - a primary `커플에 합류하기` submit button,
+  - a secondary link back to `/app`.
+- Submit to the existing `app/api/pairs/join/route.ts` with the same `code` field.
+- If `code` is missing, show a short fallback state that links to `/app` for manual entry.
+- Do not change the database schema or invitation RPC.
+
+### Acceptance criteria
+
+- `/join?code=ABC123` renders a confirmation screen for signed-in users.
+- Unauthenticated users are redirected through login and return to the join page via `next`.
+- Missing code does not submit an empty join request.
+- Existing pair onboarding and manual code entry still work.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+## 20. Replace invitation code display with share-link actions
+
+### Goal
+
+Make the owner-side invitation UX centered on copying or sharing an invitation link, while keeping the raw code visible as supporting information.
+
+### Scope
+
+- Add a small client component, for example `app/_components/invite-share-actions.tsx`.
+- Inputs:
+  - invitation `code`,
+  - absolute or relative join URL.
+- Provide:
+  - `초대 링크 복사` using `navigator.clipboard.writeText`,
+  - `공유하기` using `navigator.share` when available,
+  - user-facing copied/error state.
+- Update active invitation panels in:
+  - `app/app/page.tsx`,
+  - `app/evaluate/page.tsx` if the panel remains there.
+- Build the join URL from `NEXT_PUBLIC_SITE_URL` when available, otherwise use `/join?code=...`.
+- Keep the raw code visible but visually secondary.
+- Do not expose any pair data in the link beyond the existing invitation code.
+
+### Acceptance criteria
+
+- Active invitations show a clear share-link action before the raw code.
+- Copy works in browsers with clipboard support.
+- Native share is only shown or enabled when supported.
+- The raw code remains available for fallback/manual entry.
+- No server-only environment variable is used in a client component.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Use browser checks at:
+
+```text
+390x844 /app
+1280x900 /app
+```
+
+## 21. Make manual invitation entry secondary
+
+### Goal
+
+Keep code entry as a fallback without making it the primary invitation UX.
+
+### Scope
+
+- Update the no-pair onboarding area in `app/app/page.tsx`.
+- Keep pair creation prominent.
+- Move manual join into a secondary area such as a collapsed `<details>` block labeled `초대 코드 직접 입력`.
+- Add a short sentence that the usual flow is to open an invitation link.
+- Keep the existing `/api/pairs/join` form and field names unchanged.
+- Update visible copy from "초대 코드로 합류" to a fallback-oriented wording.
+
+### Acceptance criteria
+
+- New users still can join by manually entering a code.
+- The initial onboarding screen no longer makes manual code entry look like the primary path.
+- Copy clearly explains that invitation links are preferred.
+- Existing tests that assert onboarding wiring are updated.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+## 22. Update invitation happy-path tests and docs
+
+### Goal
+
+Cover the new share-link join flow and document the expected invitation behavior.
+
+### Scope
+
+- Update `tests/e2e/pairview-happy-path.spec.ts` to join the second user through `/join?code=...` instead of filling the dashboard form directly.
+- Add or update lightweight static tests for:
+  - `app/join/page.tsx`,
+  - the share action component,
+  - login `next` preservation for `/join?code=...`.
+- Update README or release/setup docs only if they currently mention manual invitation codes as the primary flow.
+- Keep manual code entry covered as a fallback where practical.
+
+### Acceptance criteria
+
+- E2E happy path covers:
+  - owner creates pair,
+  - invite link is available,
+  - partner opens `/join?code=...`,
+  - partner joins successfully,
+  - the rest of the review/history flow still passes.
+- Static tests prevent accidental removal of the join page and share-link UI.
+- Documentation reflects link-first invitation UX.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+npm run test:e2e
+```
