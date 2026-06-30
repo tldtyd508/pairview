@@ -13,7 +13,8 @@
 ## Supabase and Google
 
 - [ ] migration 0001–0003이 production Supabase에 순서대로 적용됐다.
-- [ ] Google provider와 local/production callback URL이 등록됐다.
+- [ ] Google provider와 Google Identity Services Web client ID가 등록됐다.
+- [ ] Google 로그인 후 `/app` 또는 `/evaluate`를 새로고침해도 세션이 유지된다.
 - [ ] 서로 다른 두 Google 계정이 로그인하고 하나의 pair로 연결된다.
 - [ ] 제3의 계정은 가득 찬 pair에 합류할 수 없다.
 - [ ] `supabase/tests/cross_pair_denial.sql`을 실제 UUID로 실행해 모든 pair-owned table의 교차 읽기가 0건임을 확인한다.

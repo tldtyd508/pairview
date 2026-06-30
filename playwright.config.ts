@@ -1,5 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
+const testPort = process.env.PAIRVIEW_E2E_PORT ?? "3001";
+const baseURL = `http://localhost:${testPort}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 60_000,
@@ -7,12 +10,12 @@ export default defineConfig({
     timeout: 10_000,
   },
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL,
     trace: "on-first-retry",
   },
   webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1 --port 3001",
-    url: "http://localhost:3001",
+    command: `npm run dev -- --hostname 127.0.0.1 --port ${testPort}`,
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 120_000,
     env: {

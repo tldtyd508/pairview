@@ -749,3 +749,162 @@ npm run typecheck
 npm run build
 npm run test:e2e
 ```
+
+## Post-MVP auth persistence tickets
+
+These tickets address the issue where a user can appear signed in immediately after Google login but lose the authenticated workspace on refresh. The likely root cause is a mismatch between client-side Supabase auth state and the server-side cookies that middleware and Server Components read.
+
+Work one ticket at a time. Keep fixture-only E2E behavior intact and do not require real Google OAuth in automated tests.
+
+## 23. Keep Google Identity Services but exchange the credential server-side
+
+### Goal
+
+Keep the Google account chooser/popup UX, but make Google login create a server-readable Supabase session cookie so refreshes, direct route loads, and middleware checks all see the same authenticated state.
+
+### Scope
+
+- Update `app/login/login-panel.tsx`.
+- Keep Google Identity Services button rendering and nonce generation.
+- Send the Google credential to a server route, for example `app/api/auth/google/route.ts`.
+- In the server route, call `supabase.auth.signInWithIdToken({ provider: "google", token, nonce })`.
+- Let the server route sync the user profile after the session is established.
+- Keep the E2E fixture login branch unchanged.
+- Keep user-facing loading and error states.
+- Do not change database schema, pair onboarding, invitation RPC behavior, or the `/join` link flow.
+
+### Acceptance criteria
+
+- Clicking the production login button opens the Google account chooser without exposing `supabase.co`.
+- The server route exchanges the credential for a Supabase session and sets cookies readable on refresh.
+- After login, the user lands on `safeNextPath(next)`.
+- Refreshing `/app`, `/evaluate`, `/history`, and `/join?code=...` keeps the user authenticated when the Supabase session is valid.
+- E2E fixture login still works without external Google or Supabase dependencies.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Manual production or preview check:
+
+```text
+1. Open `/login?next=/app`.
+2. Complete Google login.
+3. Confirm `/app` loads.
+4. Refresh `/app`.
+5. Confirm the user stays in the workspace instead of returning to `/login`.
+```
+
+## 24. Harden server-side Supabase session checks
+
+### Goal
+
+Ensure middleware and Server Components agree on authentication and refresh Supabase cookies consistently after the server-side credential exchange.
+
+### Scope
+
+- Review `middleware.ts`, `lib/supabase/server.ts`, `lib/auth/server.ts`, and the Google auth route.
+- Prefer the Supabase SSR-recommended server auth check for protected routes.
+- If `getClaims()` is unreliable for refresh behavior, replace or wrap it with `supabase.auth.getUser()` in server-side auth checks.
+- Keep `createServerClient` cookie `getAll` and `setAll` behavior compatible with:
+  - middleware response cookies,
+  - Server Component cookies,
+  - Route Handler cookies.
+- Preserve E2E fixture mode in middleware and app state loading.
+- Ensure `/join` auth gating uses the same server-side user resolution path as the rest of the app, with fixture mode still supported.
+
+### Acceptance criteria
+
+- Protected routes redirect unauthenticated users to `/login`.
+- Authenticated users are not redirected away from protected routes after refresh.
+- `/login` redirects already-authenticated users to `/app`.
+- Server Components can load the current user after a hard refresh.
+- No auth code path depends only on browser-local session state.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+npm run test:e2e
+```
+
+Manual check:
+
+```text
+Refresh these pages while signed in:
+/app
+/evaluate
+/history
+/join?code=<active-code>
+```
+
+## 25. Add auth persistence regression coverage
+
+### Goal
+
+Prevent future changes from reintroducing client-only login behavior or breaking `next` preservation.
+
+### Scope
+
+- Update `tests/auth.test.mjs` or add a focused auth wiring test.
+- Assert that `app/login/login-panel.tsx` loads Google GIS and posts the credential to `/api/auth/google`.
+- Assert that `app/api/auth/google/route.ts` uses `signInWithIdToken`.
+- Assert that login preserves `next` through the login form and server route.
+- Extend fixture E2E only where useful:
+  - unauthenticated protected route redirects to login,
+  - fixture login redirects back to the requested `next`,
+  - hard refresh of a protected fixture route remains authenticated.
+- Do not add tests that require real Google OAuth credentials.
+
+### Acceptance criteria
+
+- Static tests catch accidental reintroduction of OAuth redirect login.
+- E2E still covers sign-in boundary and protected route refresh behavior in fixture mode.
+- Invitation join links continue to preserve `next` through login.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run test:e2e
+```
+
+## 26. Update auth setup and release docs
+
+### Goal
+
+Make the required Google/Supabase/Vercel auth setup clear now that login depends on Google Identity Services and a server-side credential exchange.
+
+### Scope
+
+- Update `README.md` and `docs/RELEASE.md`.
+- Document the required Supabase Google provider setup.
+- Document Google Cloud Console requirements:
+  - authorized JavaScript origins,
+  - the Web client ID used by Google Identity Services.
+- Add a release checklist item for refresh persistence after login.
+- Keep secrets out of docs; only list variable names and URL shapes.
+
+### Acceptance criteria
+
+- A future operator can configure Google/Supabase auth without guessing which client ID or server route is used.
+- Release docs include a refresh-after-login check.
+- README does not imply an OAuth redirect flow or client-only login.
+- No secrets or project-specific private keys are added.
+
+### Validation
+
+```bash
+npm test
+npm run lint
+```

@@ -56,9 +56,7 @@ npm run dev
    - `supabase/migrations/0001_initial_schema.sql`
    - `supabase/migrations/0002_pair_onboarding.sql`
    - `supabase/migrations/0003_storage_and_photos.sql`
-3. Google OAuth의 Authorized JavaScript origins에 local/production origin을 등록하고, Supabase redirect allow list에 다음 callback을 등록합니다.
-   - `http://localhost:3000/auth/callback`
-   - `https://pairview.vercel.app/auth/callback`
+3. Google Identity Services용 Web client ID를 준비하고 Supabase Auth에서 Google provider를 활성화합니다.
 4. 생성된 private `pairview` Storage bucket이 public으로 노출되지 않았는지 확인합니다.
 5. [`supabase/tests/cross_pair_denial.sql`](supabase/tests/cross_pair_denial.sql)을 실제 테스트 사용자와 pair ID로 실행합니다.
 
@@ -76,7 +74,7 @@ npm run build
 
 Playwright E2E는 외부 OAuth와 DB에 의존하지 않는 격리 fixture 모드로 로그인 경계, pair 생성/합류, 음식점 등록, 두 리뷰, 마커, 사진, 기록 조회를 검증합니다. 실제 Google/Supabase 연결은 배포 전 수동 점검표로 별도 확인해야 합니다.
 
-Production 로그인은 Google Identity Services popup에서 받은 ID token을 nonce와 함께 Supabase에 전달합니다. 따라서 사용자는 Google 로그인 중 Supabase project domain으로 이동하지 않습니다.
+Production 로그인은 Google Identity Services popup으로 credential을 받아 서버에서 Supabase 세션 쿠키를 만든 뒤 앱으로 돌아옵니다. 새로고침 후에도 로그인 상태가 유지되는지 실제 브라우저에서 확인해야 합니다.
 
 ## Vercel deployment
 

@@ -79,10 +79,15 @@ export default function LoginPanel({
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
-        router.replace(safeNextPath(nextPath));
+        startTransition(() => {
+          router.replace(safeNextPath(nextPath));
+          router.refresh();
+        });
         return;
       }
 
+      setRedirecting(false);
+    }).catch(() => {
       setRedirecting(false);
     });
   }, [e2eMode, nextPath, router]);
@@ -104,27 +109,23 @@ export default function LoginPanel({
       return;
     }
 
-    const supabase = createSupabaseBrowserClient();
     setLoading(true);
     setMessage(null);
 
-    const { error: signInError } = await supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: response.credential,
-      nonce: nonceRef.current,
+    const responseBody = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        token: response.credential,
+        nonce: nonceRef.current,
+      }),
     });
 
-    if (signInError) {
-      setMessage(signInError.message);
+    if (!responseBody.ok) {
       setLoading(false);
-      return;
-    }
-
-    const profileResponse = await fetch("/api/auth/profile", { method: "POST" });
-    if (!profileResponse.ok) {
-      await supabase.auth.signOut();
-      setMessage("프로필을 준비하지 못했어요. 다시 시도해 주세요.");
-      setLoading(false);
+      setMessage("Google 로그인에 실패했어요. 다시 시도해 주세요.");
       return;
     }
 

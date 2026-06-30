@@ -13,9 +13,9 @@ test("auth route files are wired", () => {
   const landingPage = read("app/page.tsx");
   const loginPage = read("app/login/page.tsx");
   const loginPanel = read("app/login/login-panel.tsx");
+  const googleAuthRoute = read("app/api/auth/google/route.ts");
   const joinPage = read("app/join/page.tsx");
   const inviteShareActions = read("app/_components/invite-share-actions.tsx");
-  const callbackRoute = read("app/auth/callback/route.ts");
   const profileRoute = read("app/api/auth/profile/route.ts");
   const logoutRoute = read("app/logout/route.ts");
   const middleware = read("middleware.ts");
@@ -30,12 +30,14 @@ test("auth route files are wired", () => {
   const serverAuth = read("lib/auth/server.ts");
   const postRedirect = read("lib/http/redirect.ts");
 
-  assert.match(loginPanel, /signInWithIdToken/);
   assert.match(loginPanel, /accounts\.google\.com\/gsi\/client/);
   assert.match(loginPanel, /use_fedcm_for_prompt/);
   assert.match(loginPanel, /nonce/);
-  assert.match(callbackRoute, /exchangeCodeForSession/);
-  assert.match(callbackRoute, /syncUserProfile/);
+  assert.match(loginPanel, /router\.replace\(safeNextPath\(nextPath\)\)/);
+  assert.match(loginPanel, /fetch\("\/api\/auth\/google"/);
+  assert.doesNotMatch(loginPanel, /signInWithOAuth/);
+  assert.match(googleAuthRoute, /signInWithIdToken/);
+  assert.match(googleAuthRoute, /syncUserProfile/);
   assert.match(profileRoute, /syncUserProfile/);
   assert.match(logoutRoute, /signOut/);
   assert.match(middleware, /matcher:\s*\[\s*"\/app\/:path\*"/);
@@ -48,6 +50,7 @@ test("auth route files are wired", () => {
   assert.match(experienceRoute, /restaurant_name/);
   assert.match(reviewRoute, /experience_id/);
   assert.match(reviewRoute, /upsert/);
+  assert.match(serverAuth, /getUser/);
   assert.match(serverAuth, /getClaims/);
   assert.doesNotMatch(createRoute, /auth\.getUser/);
   assert.doesNotMatch(joinRoute, /auth\.getUser/);
