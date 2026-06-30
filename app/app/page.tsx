@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/app/_components/brand-logo";
+import { InviteShareActions } from "@/app/_components/invite-share-actions";
 import { HistoryExperienceCard } from "@/app/_components/experience-cards";
 import { WorkspaceNav } from "@/app/_components/workspace-nav";
 import { getAppState, type AppState } from "@/lib/app-state";
 import { filterAndSortExperiences, parseHistoryFilters } from "@/lib/history";
+import { buildJoinUrl } from "@/lib/invitations";
 
 export const dynamic = "force-dynamic";
 
@@ -196,8 +198,8 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               <BrandLogo />
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--page-muted)] sm:text-lg">
-              로그인을 마쳤어요. 이제 커플을 만들거나 초대 코드로 합류하면 둘만의
-              기록 공간이 열려요.
+              로그인을 마쳤어요. 이제 커플을 만들거나 초대 링크를 받으면 둘만의
+              기록 공간이 열려요. 코드 입력은 링크가 없을 때만 쓰면 돼요.
             </p>
 
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
@@ -223,27 +225,31 @@ export default async function AppHome({ searchParams }: AppPageProps) {
                 </button>
               </form>
 
-              <form
-                action="/api/pairs/join"
-                method="post"
-                className="rounded-[1.5rem] border border-[var(--page-border)] bg-white/80 p-5"
-              >
-                <p className="text-sm font-semibold">초대 코드로 합류</p>
-                <label className="mt-4 block text-sm text-[var(--page-muted)]">
-                  초대 코드
-                  <input
-                    name="code"
-                    placeholder="AB12CD34"
-                    className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 text-sm uppercase outline-none"
-                  />
-                </label>
-                <button
-                  type="submit"
-                  className="mt-5 rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
-                >
-                  합류하기
-                </button>
-              </form>
+              <details className="rounded-[1.5rem] border border-[var(--page-border)] bg-white/80 p-5">
+                <summary className="cursor-pointer list-none text-sm font-semibold">
+                  초대 코드 직접 입력
+                </summary>
+                <p className="mt-3 text-sm leading-6 text-[var(--page-muted)]">
+                  보통은 초대 링크를 열면 바로 합류할 수 있어요. 링크를 받을 수 없을
+                  때만 아래에 코드를 입력해 주세요.
+                </p>
+                <form action="/api/pairs/join" method="post" className="mt-4 grid gap-4">
+                  <label className="block text-sm text-[var(--page-muted)]">
+                    초대 코드
+                    <input
+                      name="code"
+                      placeholder="AB12CD34"
+                      className="mt-2 w-full rounded-2xl border border-[var(--page-border)] bg-white px-4 py-3 text-sm uppercase outline-none"
+                    />
+                  </label>
+                  <button
+                    type="submit"
+                    className="rounded-full border border-[var(--page-border)] bg-white/70 px-5 py-3 text-sm font-medium text-[var(--page-text)]"
+                  >
+                    합류하기
+                  </button>
+                </form>
+              </details>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -269,6 +275,7 @@ export default async function AppHome({ searchParams }: AppPageProps) {
   const { partner } = memberPair(state);
   const pairLabel = state.pair?.label ?? "이름 없는 커플";
   const activeInvite = state.invitation?.code ?? null;
+  const activeInviteJoinUrl = activeInvite ? buildJoinUrl(activeInvite) : null;
   const message = messageFromParams(params);
   const partnerUserId = partner?.user_id ?? null;
   const recentExperiences = sortByRecent(state.experiences).slice(0, 4);
@@ -503,23 +510,13 @@ export default async function AppHome({ searchParams }: AppPageProps) {
               <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
                 <div className="text-xs uppercase tracking-[0.24em] text-white/55">초대 상태</div>
                 <div className="mt-2 text-lg font-medium">
-                  {activeInvite ? "초대 코드가 활성화되어 있어요" : "활성 초대 코드가 없어요"}
+                  {activeInvite ? "초대 링크를 공유할 수 있어요" : "활성 초대 코드가 없어요"}
                 </div>
                 {activeInvite ? (
-                  <>
-                    <div className="mt-3 text-xs uppercase tracking-[0.24em] text-white/55">
-                      초대 코드
-                    </div>
-                    <div className="mt-1 text-2xl font-semibold tracking-[0.18em]">
-                      {activeInvite}
-                    </div>
-                    <div className="mt-2 text-sm text-white/70">
-                      한 번만 공유하면 돼요. 사용되면 더 이상 쓸 수 없어요.
-                    </div>
-                  </>
+                  <InviteShareActions code={activeInvite} joinUrl={activeInviteJoinUrl ?? "/app"} />
                 ) : (
                   <p className="mt-2 text-sm text-white/70">
-                    아직 초대 코드가 없거나, 이미 사용된 상태예요.
+                    아직 초대 링크가 없거나, 이미 사용된 상태예요.
                   </p>
                 )}
               </div>

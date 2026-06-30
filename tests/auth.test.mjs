@@ -13,6 +13,8 @@ test("auth route files are wired", () => {
   const landingPage = read("app/page.tsx");
   const loginPage = read("app/login/page.tsx");
   const loginPanel = read("app/login/login-panel.tsx");
+  const joinPage = read("app/join/page.tsx");
+  const inviteShareActions = read("app/_components/invite-share-actions.tsx");
   const callbackRoute = read("app/auth/callback/route.ts");
   const profileRoute = read("app/api/auth/profile/route.ts");
   const logoutRoute = read("app/logout/route.ts");
@@ -54,6 +56,8 @@ test("auth route files are wired", () => {
   assert.match(appPage, /최근 기록/);
   assert.match(appPage, /베스트 기록/);
   assert.match(appPage, /평가 대기/);
+  assert.match(appPage, /초대 코드 직접 입력/);
+  assert.match(appPage, /초대 링크를 받으면/);
   assert.doesNotMatch(appPage, /onboarding/);
   assert.match(workspaceNav, /대시보드/);
   assert.match(workspaceNav, /평가 남기기/);
@@ -66,6 +70,12 @@ test("auth route files are wired", () => {
   assert.match(landingPage, /각자 점수/);
   assert.match(landingPage, /마커를 남기고 사진을 붙여 둘 수 있어요/);
   assert.doesNotMatch(landingPage, /Coming soon/);
+  assert.match(joinPage, /커플에 합류하기/);
+  assert.match(joinPage, /\/login\?next=/);
+  assert.match(joinPage, /초대 링크/);
+  assert.match(joinPage, /한 번만 쓰는 링크예요/);
+  assert.match(inviteShareActions, /초대 링크 복사/);
+  assert.match(inviteShareActions, /공유하기/);
   assert.match(migration, /shares_pair_with_user/);
   assert.match(migration, /users can read pairmate profiles/);
   assert.match(migration, /pair_is_full/);

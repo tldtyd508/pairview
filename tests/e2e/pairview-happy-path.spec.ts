@@ -38,10 +38,11 @@ test("pairview happy path", async ({ browser }) => {
   await ownerPage.getByRole("button", { name: "커플 만들기" }).click();
   await expect(ownerPage.getByText("최근 기록", { exact: true })).toBeVisible();
   await expect(ownerPage.getByText("베스트 기록", { exact: true })).toBeVisible();
-  await expect(ownerPage.getByText("대시보드", { exact: true })).toBeVisible();
+  await expect(ownerPage.getByRole("link", { name: "대시보드" })).toBeVisible();
+  await expect(ownerPage.getByRole("button", { name: "초대 링크 복사" })).toBeVisible();
 
   await ownerPage.goto("/evaluate");
-  await expect(ownerPage.getByRole("heading", { name: "평가 남기기" })).toBeVisible();
+  await expect(ownerPage.getByRole("heading", { name: "기록 남기기" })).toBeVisible();
 
   await ownerPage.getByRole("textbox", { name: "이름", exact: true }).fill("셀카");
   await ownerPage.getByLabel("아이콘").fill("📸");
@@ -71,10 +72,10 @@ test("pairview happy path", async ({ browser }) => {
   await partner.addCookies([partnerAuthCookie]);
   const partnerPage = await partner.newPage();
 
-  await partnerPage.goto("/app");
-  await expect(partnerPage.getByText("초대 코드로 합류")).toBeVisible();
-  await partnerPage.getByLabel("초대 코드").fill("PAIRVIEW");
-  await partnerPage.getByRole("button", { name: "합류하기" }).click();
+  await partnerPage.goto("/join?code=PAIRVIEW");
+  await expect(partnerPage.getByRole("heading", { name: "커플에 합류하기" })).toBeVisible();
+  await expect(partnerPage.getByText("PAIRVIEW", { exact: true })).toBeVisible();
+  await partnerPage.getByRole("button", { name: "커플에 합류하기" }).click();
   await expect(partnerPage.getByText("최근 기록", { exact: true })).toBeVisible();
 
   await partnerPage.goto(`/evaluate?experience=${experienceId}`);

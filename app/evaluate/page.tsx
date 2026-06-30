@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { InviteShareActions } from "@/app/_components/invite-share-actions";
 import { EvaluationExperienceCard } from "@/app/_components/experience-cards";
 import { WorkspaceNav } from "@/app/_components/workspace-nav";
 import { getAppState, type AppState } from "@/lib/app-state";
+import { buildJoinUrl } from "@/lib/invitations";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +103,7 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
 
   const { partner } = memberPair(state);
   const activeInvite = state.invitation?.code ?? null;
+  const activeInviteJoinUrl = activeInvite ? buildJoinUrl(activeInvite) : null;
   const message = messageFromParams(params);
   const selectedExperienceId =
     typeof params?.experience === "string" ? params.experience : null;
@@ -353,23 +356,15 @@ export default async function EvaluatePage({ searchParams }: EvaluatePageProps) 
                   커플 정보
                 </p>
                 <div className="mt-4 text-lg font-medium">
-                  {activeInvite ? "초대 코드가 활성화되어 있어요" : "활성 초대 코드가 없어요"}
+                  {activeInvite ? "초대 링크를 공유할 수 있어요" : "활성 초대 코드가 없어요"}
                 </div>
                 {activeInvite ? (
-                  <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/55">
-                      초대 코드
-                    </div>
-                    <div className="mt-2 text-2xl font-semibold tracking-[0.18em]">
-                      {activeInvite}
-                    </div>
-                    <div className="mt-2 text-sm text-white/70">
-                      한 번만 공유하면 돼요. 사용되면 더 이상 쓸 수 없어요.
-                    </div>
+                  <div className="mt-4">
+                    <InviteShareActions code={activeInvite} joinUrl={activeInviteJoinUrl ?? "/app"} />
                   </div>
                 ) : (
                   <p className="mt-4 text-sm text-white/70">
-                    아직 초대 코드가 없거나 이미 사용된 상태예요.
+                    아직 초대 링크가 없거나 이미 사용된 상태예요.
                   </p>
                 )}
               </section>
